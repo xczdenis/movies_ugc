@@ -1,0 +1,37 @@
+x-base-node: &base-node
+    image: yandex/clickhouse-server:21.3
+    env_file: .env
+    depends_on:
+        - zookeeper
+
+services:
+    zookeeper:
+        image: zookeeper:3.8
+
+    clickhouse-node1:
+        <<: *base-node
+        volumes:
+            - ./src/db/clickhouse/initdb:/docker-entrypoint-initdb.d
+            - ./src/db/clickhouse/config/metrika.xml:/etc/metrika.xml
+            - ./src/db/clickhouse/config/node1:/etc/clickhouse-server
+
+    clickhouse-node2:
+        <<: *base-node
+        volumes:
+            - ./src/db/clickhouse/initdb:/docker-entrypoint-initdb.d
+            - ./src/db/clickhouse/config/metrika.xml:/etc/metrika.xml
+            - ./src/db/clickhouse/config/node2:/etc/clickhouse-server
+
+    clickhouse-node3:
+        <<: *base-node
+        volumes:
+            - ./src/db/clickhouse/initdb:/docker-entrypoint-initdb.d
+            - ./src/db/clickhouse/config/metrika.xml:/etc/metrika.xml
+            - ./src/db/clickhouse/config/node3:/etc/clickhouse-server
+
+    clickhouse-node4:
+        <<: *base-node
+        volumes:
+            - ./src/db/clickhouse/initdb:/docker-entrypoint-initdb.d
+            - ./src/db/clickhouse/config/metrika.xml:/etc/metrika.xml
+            - ./src/db/clickhouse/config/node4:/etc/clickhouse-server

@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "movies-ugc"
+version = "0.1.0"
+description = "analytics service for movies"
+authors = ["Denis <xczdenis@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+clickhouse-driver = "^0.2.4"
+pydantic = "^1.10.2"
+python-dotenv = "^0.21.0"
+loguru = "^0.6.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

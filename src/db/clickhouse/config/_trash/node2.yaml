@@ -1,0 +1,4 @@
+interserver_http_host: clickhouse-node2
+macros:
+    shard: 01
+    replica: clickhouse-node2
