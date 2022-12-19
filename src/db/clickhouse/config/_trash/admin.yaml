@@ -1,7 +1,0 @@
-users:
-    admin:
-        password: 123qwe
-        networks:
-            ip: '::/0'
-        profile: default
-        quota: default

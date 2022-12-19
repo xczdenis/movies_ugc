@@ -1,37 +1,29 @@
-from functools import wraps
+from adapters.base import BaseDBClient, BaseDBMigrator
+from adapters.clickhouse.client import ClickHouseMigrator, ClickHouseClient
+from settings import ch_settings
 
 
-def to_params(*query_params, _required: bool = False):
-    """
-    Декоратор, который извлекает все параметры, указанные query_params, из
-    kwargs и кладет их в аргумент params. Если _required = True, то каждый параметр
-    в query_params считается обязательным. Если какого-либо параметра нет среди kwargs,
-    то выдается ошибка AttributeError.
-    """
-
-    def _wrapper(func):
-        @wraps(func)
-        def _wrapped(*args, **kwargs):
-            params = (kwargs.pop("params", None) or {}).copy()
-            for p in query_params:
-                if p in kwargs:
-                    v = kwargs.pop(p)
-                    if v is not None:
-                        params[p] = v
-                elif _required:
-                    raise AttributeError("Missing argument '%s'" % p)
-
-            return func(*args, params=params, **kwargs)
-
-        return _wrapped
-
-    return _wrapper
+def get_db_client(
+    host: str, port: int | None = None, is_replica: bool = False
+) -> BaseDBClient:
+    return ClickHouseClient(host=host, port=port, host_is_replica=is_replica)
 
 
-def required_params(*query_params):
-    """
-    Декоратор, который извлекает все параметры, указанные query_params, из
-    kwargs и кладет их в аргумент params. Если какого-либо параметра нет среди kwargs,
-    то выдается ошибка AttributeError
-    """
-    return to_params(*query_params, _required=True)
+def get_db_migrator(
+    client: BaseDBClient, dialect: str, db_name: str, **kwargs
+) -> BaseDBMigrator:
+    return ClickHouseMigrator(client=client, dialect=dialect, db_name=db_name, **kwargs)
+
+
+def get_databases():
+    return (ch_settings.CH_DB_NAME, False), (ch_settings.CH_REPLICA_DB_NAME, True)
+
+
+def migrate(db_client: BaseDBClient, dialect: str, db_name: str, **kwargs) -> None:
+    db_migrator = get_db_migrator(
+        client=db_client,
+        dialect=dialect,
+        db_name=db_name,
+        **kwargs,
+    )
+    db_migrator.db_upgrade()

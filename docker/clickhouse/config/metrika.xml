@@ -14,7 +14,7 @@
             <database>system</database>
             <table>query_log</table>
             <partition_by>toYYYYMM(event_date)</partition_by>
-            <ttl>'event_date + INTERVAL 30 DAY DELETE'</ttl>
+            <ttl>event_date + INTERVAL 30 DAY DELETE</ttl>
             <flush_interval_milliseconds>7500</flush_interval_milliseconds>
         </query_log>
 
@@ -43,24 +43,24 @@
             <main_cluster>
                 <shard>
                     <replica>
-                        <default_database from_env="DB_NAME" />
+                        <default_database from_env="CH_DB_NAME" />
                         <host>clickhouse-node1</host>
                         <port>9000</port>
                     </replica>
                     <replica>
-                        <default_database from_env="REPLICA_DB_NAME" />
+                        <default_database from_env="CH_REPLICA_DB_NAME" />
                         <host>clickhouse-node2</host>
                         <port>9000</port>
                     </replica>
                 </shard>
                 <shard>
                     <replica>
-                        <default_database from_env="DB_NAME" />
+                        <default_database from_env="CH_DB_NAME" />
                         <host>clickhouse-node3</host>
                         <port>9000</port>
                     </replica>
                     <replica>
-                        <default_database from_env="REPLICA_DB_NAME" />
+                        <default_database from_env="CH_REPLICA_DB_NAME" />
                         <host>clickhouse-node4</host>
                         <port>9000</port>
                     </replica>
@@ -70,13 +70,13 @@
 
         <zookeeper>
             <node index="1">
-                <host>zookeeper</host>
-                <port>2181</port>
+                <host from_env="CH_ZOO_HOST_NAME" />
+                <port from_env="CH_ZOO_PORT_NUMBER" />
             </node>
         </zookeeper>
 
         <macros>
-            <cluster>company_cluster</cluster>
+            <cluster>main_cluster</cluster>
         </macros>
 
         <distributed_ddl>

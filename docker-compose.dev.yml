@@ -1,4 +1,9 @@
 services:
+    clickhouse-zookeeper:
+        environment:
+            ALLOW_ANONYMOUS_LOGIN: 'yes'
+        volumes:
+            - ch_zoo_data_dev:/bitnami/zookeeper
     clickhouse-node1:
         volumes:
             - ch_data_node1_dev:/var/lib/clickhouse
@@ -23,8 +28,11 @@ services:
         ports:
             - "8126:8123"
             - "9003:9000"
+
 volumes:
+    ch_zoo_data_dev:
     ch_data_node1_dev:
     ch_data_node2_dev:
     ch_data_node3_dev:
     ch_data_node4_dev:
+

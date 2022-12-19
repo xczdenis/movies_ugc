@@ -1,63 +1,66 @@
 import csv
 import datetime
 import random
-from pathlib import Path
+from math import ceil
 
 from loguru import logger
 
-from db.clickhouse.client import ClickHouseClient
-
-ROOT_DIR = Path(__file__).resolve().parent.parent
+from adapters.clickhouse.client import ClickHouseClient
+from settings import olap_research_settings, ROOT_DIR
 
 db_client = ClickHouseClient(host="localhost", port="9000")
 
 
-def insert_to_db(values):
-    query = f"INSERT INTO default.views_progress (id, user_id, movie_id, rating, movie_frame, created) VALUES {values}"
+def insert_to_db(fields_values):
+    fields_str = "(id, user_id, movie_id, rating, movie_frame, created)"
+    query = f"INSERT INTO default.views_progress {fields_str} VALUES {fields_values}"
     start = datetime.datetime.now()
     db_client.execute(query)
     return datetime.datetime.now() - start
 
 
-BENCH_SIZE = 1000000
-FILE_NAME = "ratings.csv"
+BENCH_SIZE = olap_research_settings.BENCH_SIZE
+FILM_MAX_LENGTH = 7200
 
-start = datetime.datetime.now()
-sql_duration = datetime.timedelta(0)
-total_rows = 1
-total_benches = 0
-with open(ROOT_DIR / "fake_data" / FILE_NAME, newline="") as csvfile:
-    reader = csv.reader(csvfile, delimiter=",", quotechar="|")
-    next(reader)
+if __name__ == "__main__":
+    start = datetime.datetime.now()
+    sql_duration = datetime.timedelta(0)
+    with open(ROOT_DIR / olap_research_settings.FAKE_DATA_PATH, newline="") as csvfile:
+        reader = csv.reader(csvfile, delimiter=",", quotechar="|")
+        next(reader)
 
-    field_values = ""
-    current_bench_size = 0
-    bench_start = datetime.datetime.now()
-    for row in reader:
-        frame = random.randint(1, 7200)
-        field_values += f"({total_rows}, {row[0]}, {row[1]}, {row[2]}, {frame}, now()), "
-        if current_bench_size == BENCH_SIZE - 1:
-            bench_sql_duration = insert_to_db(field_values[:-2])
-            bench_end = datetime.datetime.now()
-            logger.info(f'Total rows: {total_rows}. Bench: {bench_end - bench_start}; Only SQL: {bench_sql_duration}')
-            sql_duration += bench_sql_duration
-            current_bench_size = 0
-            total_benches += 1
-            field_values = ""
-            bench_start = datetime.datetime.now()
+        field_values = ""
+        current_bench_size = 0
+        bench_start = datetime.datetime.now()
+        for total_rows, row in enumerate(reader):
+            frame = random.SystemRandom().randint(1, FILM_MAX_LENGTH)
+            field_values += (
+                f"({total_rows}, {row[0]}, {row[1]}, {row[2]}, {frame}, now()), "
+            )
+            if current_bench_size == BENCH_SIZE - 1:
+                bench_sql_duration = insert_to_db(field_values[:-2])
+                logger.info(
+                    "Total rows: {rows}. Bench: {t1}; Only SQL: {t2}".format(
+                        rows=total_rows,
+                        t1=datetime.datetime.now() - bench_start,
+                        t2=bench_sql_duration,
+                    ),
+                )
+                sql_duration += bench_sql_duration
+                current_bench_size = 0
+                field_values = ""
+                bench_start = datetime.datetime.now()
 
-        current_bench_size += 1
-        total_rows += 1
+            current_bench_size += 1
 
-        # if total_benches == 3:
-        #     break
+        if field_values:
+            insert_to_db(field_values[:-2])
 
-    if field_values:
-        insert_to_db(field_values[:-2])
+    logger.success("------------------------------")
+    logger.success("Все данные успешно загружены!")
+    logger.success("------------------------------")
 
-end = datetime.datetime.now()
-delta = end-start
-print("Всего пачек:", total_benches)
-print("Всего строк:", total_rows)
-print(f'Общее время выполнения: {delta}')
-print(f'Только SQL: {sql_duration}')
+    logger.info("Всего пачек: %s" % ceil(total_rows / BENCH_SIZE))
+    logger.info("Всего строк: %s" % (total_rows + 1))
+    logger.info("Общее время выполнения: %s" % (datetime.datetime.now() - start))
+    logger.info("Только SQL: %s" % sql_duration)

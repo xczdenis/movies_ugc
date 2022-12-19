@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<yandex>
+    <interserver_http_host from_env="CH_NODE_HOST_NAME" />
+    <macros>
+        <shard from_env="CH_NODE_SHARD_ID" />
+        <replica from_env="CH_NODE_REPLICA_NAME" />
+    </macros>
+</yandex>

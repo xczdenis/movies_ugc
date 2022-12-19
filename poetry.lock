@@ -1,4 +1,12 @@
 [[package]]
+name = "backoff"
+version = "2.2.1"
+description = "Function decoration for backoff and retry"
+category = "main"
+optional = false
+python-versions = ">=3.7,<4.0"
+
+[[package]]
 name = "clickhouse-driver"
 version = "0.2.4"
 description = "Python driver with native interface for ClickHouse"
@@ -129,9 +137,13 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "4248c31e55c03eed16b1fd991d6a916f4d6768bf2ff529597024b8025199922f"
+content-hash = "ead9542276961230d9d5e026260edb7a945a7c56c12a2eb506b4800e17570a5e"
 
 [metadata.files]
+backoff = [
+    {file = "backoff-2.2.1-py3-none-any.whl", hash = "sha256:63579f9a0628e06278f7e47b7d7d5b6ce20dc65c5e96a6f3ca99a6adca0396e8"},
+    {file = "backoff-2.2.1.tar.gz", hash = "sha256:03f829f5bb1923180821643f8753b0502c3b682293992485b0eef2807afa5cba"},
+]
 clickhouse-driver = [
     {file = "clickhouse-driver-0.2.4.tar.gz", hash = "sha256:bbbc4180bc645d5810c7253e2b59c9381953f8b9bbbac34f0c06103d7c0c56dc"},
     {file = "clickhouse_driver-0.2.4-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:6684e17155c87997908effafa41225cd13d75118c6fc50eb4a16cb2253b6ac23"},

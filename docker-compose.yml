@@ -1,37 +1,60 @@
 x-base-node: &base-node
-    image: yandex/clickhouse-server:21.3
     env_file: .env
+#    build:
+#        context: .
+#        dockerfile: ./docker/clickhouse/node.Dockerfile
+#    image: yandex/clickhouse-server:21.3
+    image: clickhouse-node-base-image
     depends_on:
-        - zookeeper
+        - clickhouse-zookeeper
 
 services:
-    zookeeper:
-        image: zookeeper:3.8
+    clickhouse-initer:
+        build:
+            context: .
+            dockerfile: ./docker/clickhouse/initer.Dockerfile
+        env_file: .env
+        depends_on:
+            - clickhouse-zookeeper
+
+    clickhouse-zookeeper:
+        image: bitnami/zookeeper:3.8
+        hostname: ${CH_ZOO_HOST_NAME:-clickhouse-zookeeper}
+        environment:
+            ZOO_PORT_NUMBER: ${CH_ZOO_PORT_NUMBER}
+
+    clickhouse-node-base:
+        build:
+            context: .
+            dockerfile: ./docker/clickhouse/node.Dockerfile
+        image: clickhouse-node-base-image
+        entrypoint: "bash -c"
+        command: "exit 0"
 
     clickhouse-node1:
         <<: *base-node
-        volumes:
-            - ./src/db/clickhouse/initdb:/docker-entrypoint-initdb.d
-            - ./src/db/clickhouse/config/metrika.xml:/etc/metrika.xml
-            - ./src/db/clickhouse/config/node1:/etc/clickhouse-server
+        environment:
+            CH_NODE_HOST_NAME: clickhouse-node1
+            CH_NODE_SHARD_ID: 01
+            CH_NODE_REPLICA_NAME: clickhouse-node1
 
     clickhouse-node2:
         <<: *base-node
-        volumes:
-            - ./src/db/clickhouse/initdb:/docker-entrypoint-initdb.d
-            - ./src/db/clickhouse/config/metrika.xml:/etc/metrika.xml
-            - ./src/db/clickhouse/config/node2:/etc/clickhouse-server
+        environment:
+            CH_NODE_HOST_NAME: clickhouse-node2
+            CH_NODE_SHARD_ID: 01
+            CH_NODE_REPLICA_NAME: clickhouse-node2
 
     clickhouse-node3:
         <<: *base-node
-        volumes:
-            - ./src/db/clickhouse/initdb:/docker-entrypoint-initdb.d
-            - ./src/db/clickhouse/config/metrika.xml:/etc/metrika.xml
-            - ./src/db/clickhouse/config/node3:/etc/clickhouse-server
+        environment:
+            CH_NODE_HOST_NAME: clickhouse-node3
+            CH_NODE_SHARD_ID: 02
+            CH_NODE_REPLICA_NAME: clickhouse-node3
 
     clickhouse-node4:
         <<: *base-node
-        volumes:
-            - ./src/db/clickhouse/initdb:/docker-entrypoint-initdb.d
-            - ./src/db/clickhouse/config/metrika.xml:/etc/metrika.xml
-            - ./src/db/clickhouse/config/node4:/etc/clickhouse-server
+        environment:
+            CH_NODE_HOST_NAME: clickhouse-node4
+            CH_NODE_SHARD_ID: 02
+            CH_NODE_REPLICA_NAME: clickhouse-node4

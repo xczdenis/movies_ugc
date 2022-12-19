@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
 
-from db.base import Model, sql_types
+from adapters.base import sql_types, Model
 
 
 @dataclass
-class ViewMixin(Model):
+class ViewMixin(object):
     __tablename__: str = "views_progress"
 
     id = sql_types.int64
@@ -16,7 +16,7 @@ class ViewMixin(Model):
 
 
 @dataclass
-class View(ViewMixin):
+class View(ViewMixin, Model):
     __table_args__: dict = field(
         default_factory=lambda: {
             "ENGINE =": "ReplicatedMergeTree('/clickhouse/tables/shard{shard}/{table}', '{replica}')",
@@ -28,9 +28,10 @@ class View(ViewMixin):
 
 
 @dataclass
-class DistributedView(ViewMixin):
+class DistributedView(ViewMixin, Model):
     __table_args__: dict = field(
         default_factory=lambda: {
+            "is_distributed": True,
             "ENGINE =": "Distributed('$cluster', '', $table, rand())",
         }
     )
