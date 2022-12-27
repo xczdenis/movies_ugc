@@ -1,0 +1,16 @@
+<clickhouse>
+    <zookeeper>
+        <node index="1">
+            <host>clickhouse-node1</host>
+            <port from_env="CH_KEEPER_TCP_PORT"/>
+        </node>
+        <node index="2">
+            <host>clickhouse-node2</host>
+            <port from_env="CH_KEEPER_TCP_PORT"/>
+        </node>
+        <node index="3">
+            <host>clickhouse-node3</host>
+            <port from_env="CH_KEEPER_TCP_PORT"/>
+        </node>
+    </zookeeper>
+</clickhouse>

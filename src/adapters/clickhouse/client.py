@@ -66,6 +66,7 @@ class ClickHouseMigrator(BaseDBMigrator):
         logger.debug(
             "Create table %s.%s' on host '%s'" % (db, table.__tablename__, self.client.uri)
         )
+        logger.debug(query)
         self.client.execute(query)
 
     @classmethod

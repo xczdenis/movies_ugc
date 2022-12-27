@@ -4,7 +4,7 @@ import json
 from loguru import logger
 
 from adapters.clickhouse.client import ClickHouseClient
-from settings import olap_research_settings, ROOT_DIR
+from src.config.settings import olap_research_settings, ROOT_DIR
 
 db_client = ClickHouseClient(host="localhost", port="9000")
 

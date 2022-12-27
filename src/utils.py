@@ -1,6 +1,8 @@
+from pprint import pprint
+
 from adapters.base import BaseDBClient, BaseDBMigrator
 from adapters.clickhouse.client import ClickHouseMigrator, ClickHouseClient
-from settings import ch_settings
+from src.config.settings import ch_settings
 
 
 def get_db_client(
@@ -27,3 +29,6 @@ def migrate(db_client: BaseDBClient, dialect: str, db_name: str, **kwargs) -> No
         **kwargs,
     )
     db_migrator.db_upgrade()
+
+
+pprint(ch_settings.dict())

@@ -4,6 +4,8 @@ PREFIX_DEV=dev
 PREFIX_TEST=test
 PREFIX_PROD=prod
 
+CURRENT_ENVIRONMENT_PREFIX=PREFIX_DEV
+
 DOCKER_COMPOSE_MAIN_FILE=docker-compose.yml
 DOCKER_COMPOSE_DEV_FILE=docker-compose.dev.yml
 DOCKER_COMPOSE_PROD_FILE=docker-compose.prod.yml
@@ -11,7 +13,6 @@ DOCKER_COMPOSE_TEST_FILE=docker-compose.test.yml
 DOCKER_COMPOSE_TEST_DEV_FILE=docker-compose.test.dev.yml
 
 COMPOSE_OPTION_START_AS_DEMON=up -d --build
-
 
 # define standard colors
 ifneq (,$(findstring xterm,${TERM}))
@@ -36,46 +37,110 @@ else
 	RESET        := ""
 endif
 
-
 # read env variables from .env
 ifneq (,$(wildcard ./.env))
 	include .env
 	export
 endif
 
+# looking for docker-compose files
+ifeq (,$(wildcard ./${DOCKER_COMPOSE_PROD_FILE}))
+	DOCKER_COMPOSE_PROD_FILE=_
+endif
+ifeq (,$(wildcard ./${DOCKER_COMPOSE_DEV_FILE}))
+	DOCKER_COMPOSE_DEV_FILE=_
+endif
+ifeq (,$(wildcard ./${DOCKER_COMPOSE_TEST_FILE}))
+	DOCKER_COMPOSE_TEST_FILE=_
+endif
+ifeq (,$(wildcard ./${DOCKER_COMPOSE_TEST_DEV_FILE}))
+	DOCKER_COMPOSE_TEST_DEV_FILE=_
+endif
 
-# set COMPOSE_PROJECT_NAME if it is not defined
+# set envs if they are not defined
 ifeq ($(COMPOSE_PROJECT_NAME),)
 	COMPOSE_PROJECT_NAME=$(DEFAULT_PROJECT_NAME)
 endif
-
 ifeq ($(DOCKER_BUILDKIT),)
 	DOCKER_BUILDKIT=1
 endif
-
-
-define run_docker_compose
-	DOCKER_BUILDKIT=$(DOCKER_BUILDKIT) COMPOSE_PROJECT_NAME=$(COMPOSE_PROJECT_NAME)_$(1) docker-compose -f $(DOCKER_COMPOSE_MAIN_FILE) -f $(2) $(3) $(4)
-endef
+ifeq ($(ENVIRONMENT),)
+	ENVIRONMENT=production
+endif
+ifeq ($(ENVIRONMENT), development)
+   CURRENT_ENVIRONMENT_PREFIX=${PREFIX_DEV}
+else
+   CURRENT_ENVIRONMENT_PREFIX=${PREFIX_PROD}
+endif
 
 
 define log
 	@echo ""
 	@echo "${WHITE}----------------------------------------${RESET}"
-	@echo "${BLUE}$(1)${RESET}"
+	@echo "${BLUE}$(strip ${1})${RESET}"
 	@echo "${WHITE}----------------------------------------${RESET}"
 endef
 
 
-#down: $(RUN_PROD_DOWN) $(RUN_DEV_DOWN) $(RUN_TEST_DOWN)
-#	$(call log,Down containers $(COMPOSE_PROJECT_NAME))
-#	docker-compose -f $(DOCKER_COMPOSE_MAIN_FILE) -f $(DOCKER_COMPOSE_PROD_FILE) down
-#	docker-compose -f $(DOCKER_COMPOSE_MAIN_FILE) -f $(DOCKER_COMPOSE_DEV_FILE) down
-#	docker-compose -f $(DOCKER_COMPOSE_MAIN_FILE) -f $(DOCKER_COMPOSE_TEST_FILE) down
-down: dev-down
-	$(call log, Down containers $(COMPOSE_PROJECT_NAME))
-	docker-compose -f $(DOCKER_COMPOSE_MAIN_FILE) down
+define run_docker_compose_for_env
+	@if [ $(strip ${2}) != "_" ]; then \
+		make run_docker_compose_for_env \
+			env=$(strip ${1}) \
+			override_file="-f ${2}" \
+			cmd=$(strip ${3}); \
+    else \
+		make run_docker_compose_for_env \
+			env=$(strip ${1}) \
+			cmd=$(strip ${3}); \
+    fi
+endef
+run_docker_compose_for_env:
+	@if [ $(strip ${env}) != "_" ]; then \
+		DOCKER_BUILDKIT=${DOCKER_BUILDKIT} \
+		COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}_$(strip ${env}) \
+		docker-compose \
+			-f ${DOCKER_COMPOSE_MAIN_FILE} \
+			$(strip ${override_file}) \
+			$(strip ${cmd}); \
+    else \
+		DOCKER_BUILDKIT=${DOCKER_BUILDKIT} \
+		COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME} \
+		docker-compose \
+			-f ${DOCKER_COMPOSE_MAIN_FILE} \
+			$(strip ${override_file}) \
+			$(strip ${cmd}); \
+    fi
 
+
+define run_docker_compose_for_current_env
+	@if [ ${CURRENT_ENVIRONMENT_PREFIX} = ${PREFIX_DEV} ]; then \
+		if [ "${DOCKER_COMPOSE_DEV_FILE}" != "_" ]; then \
+			make run_docker_compose_for_env \
+				env=${CURRENT_ENVIRONMENT_PREFIX} \
+				override_file="-f ${DOCKER_COMPOSE_DEV_FILE}" \
+				cmd="$(strip ${1})"; \
+		else \
+			make run_docker_compose_for_env \
+				env=${CURRENT_ENVIRONMENT_PREFIX} \
+				cmd="$(strip ${1})"; \
+		fi \
+    elif [ ${CURRENT_ENVIRONMENT_PREFIX} = ${PREFIX_PROD} ]; then \
+		if [ "${DOCKER_COMPOSE_PROD_FILE}" != "_" ]; then \
+			make run_docker_compose_for_env \
+				env=${CURRENT_ENVIRONMENT_PREFIX} \
+				override_file="-f ${DOCKER_COMPOSE_PROD_FILE}" \
+				cmd="$(strip ${1})"; \
+		else \
+			make run_docker_compose_for_env \
+				env=${CURRENT_ENVIRONMENT_PREFIX} \
+				cmd="$(strip ${1})"; \
+		fi \
+    fi
+endef
+
+
+# remove all existing containers, volumes, images
+.PHONEY: remove
 remove:
 	@clear
 	@echo "${RED}----------------!!! DANGER !!!----------------"
@@ -86,58 +151,76 @@ remove:
 	docker system prune -a -f --volumes
 
 
-#############
-# PROD
-#############
-prod: down
-	$(call log,Run containers (PROD))
-	ENVIRONMENT=production $(call run_docker_compose,$(PREFIX_PROD),$(DOCKER_COMPOSE_PROD_FILE),$(COMPOSE_OPTION_START_AS_DEMON),$(s))
+# stop and remove all running containers
+.PHONEY: down down-prod down-dev down-test
+down:
+	$(call log, Down containers)
+	@make down-prod
+	@make down-dev
+	@make down-test
+down-prod:
+	$(call run_docker_compose_for_env, ${PREFIX_PROD}, ${DOCKER_COMPOSE_PROD_FILE}, down)
+	$(call run_docker_compose_for_env, "_", ${DOCKER_COMPOSE_PROD_FILE}, down)
+down-dev:
+	$(call run_docker_compose_for_env, ${PREFIX_DEV}, ${DOCKER_COMPOSE_DEV_FILE}, down)
+	$(call run_docker_compose_for_env, "_", ${DOCKER_COMPOSE_DEV_FILE}, down)
+down-test:
+	$(call run_docker_compose_for_env, ${PREFIX_TEST}, ${DOCKER_COMPOSE_TEST_FILE}, down)
+	$(call run_docker_compose_for_env, "_", ${DOCKER_COMPOSE_TEST_FILE}, down)
 
 
-prod-check:
-	$(call log,Check configuration (PROD))
-	ENVIRONMENT=production $(call run_docker_compose,$(PREFIX_PROD),$(DOCKER_COMPOSE_PROD_FILE),config)
+# build and run docker containers in demon mode
+.PHONEY: run
+run: down
+	$(call log, Run containers (${CURRENT_ENVIRONMENT_PREFIX}))
+	$(call run_docker_compose_for_current_env, ${COMPOSE_OPTION_START_AS_DEMON} ${s})
 
 
-prod-stop:
-	$(call log,Stop running containers (PROD))
-	ENVIRONMENT=production $(call run_docker_compose,$(PREFIX_PROD),$(DOCKER_COMPOSE_PROD_FILE),stop,$(s))
+# show container's logs
+.PHONEY: logs _logs
+logs:
+	@read -p "${ORANGE}Container name: ${RESET}" _TAG && \
+	if [ "_$${_TAG}" != "_" ]; then \
+		make _logs s="$${_TAG}"; \
+	else \
+	    echo aborting; exit 1; \
+	fi
+_logs:
+	$(call run_docker_compose_for_current_env, logs ${s})
 
 
-prod-down:
-	$(call log,Down running containers (PROD))
-	ENVIRONMENT=production $(call run_docker_compose,$(PREFIX_PROD),$(DOCKER_COMPOSE_PROD_FILE),down)
+# run bash into container
+.PHONEY: bash _bash
+bash:
+	@read -p "${ORANGE}Container name: ${RESET}" _TAG && \
+	if [ "_$${_TAG}" != "_" ]; then \
+		make _bash s="$${_TAG}"; \
+	else \
+	    echo aborting; exit 1; \
+	fi
+_bash:
+	$(call run_docker_compose_for_current_env, exec -it ${s} bash)
 
 
-prod-logs:
-	ENVIRONMENT=production $(call run_docker_compose,$(PREFIX_PROD),$(DOCKER_COMPOSE_PROD_FILE),logs,$(s))
+# stop containers
+.PHONEY: stop _stop
+stop:
+	@read -p "${ORANGE}Containers name (press Enter to stop all containers): ${RESET}" _TAG && \
+	if [ "_$${_TAG}" != "_" ]; then \
+		make _stop s="$${_TAG}"; \
+	else \
+	    make _stop; \
+	fi
+_stop:
+	$(call log, Stop containers (${CURRENT_ENVIRONMENT_PREFIX}))
+	$(call run_docker_compose_for_current_env, stop ${s})
 
 
-#############
-# DEV
-#############
-dev: down
-	$(call log,Run containers (DEV))
-	$(call run_docker_compose,$(PREFIX_DEV),$(DOCKER_COMPOSE_DEV_FILE),$(COMPOSE_OPTION_START_AS_DEMON),$(s))
-
-
-dev-check:
-	$(call log,Check configuration (DEV))
-	$(call run_docker_compose,$(PREFIX_DEV),$(DOCKER_COMPOSE_DEV_FILE),config)
-
-
-dev-stop:
-	$(call log,Stop running containers (DEV))
-	$(call run_docker_compose,$(PREFIX_DEV),$(DOCKER_COMPOSE_DEV_FILE),stop,$(s))
-
-
-dev-down:
-	$(call log,Down running containers (DEV))
-	$(call run_docker_compose,$(PREFIX_DEV),$(DOCKER_COMPOSE_DEV_FILE),down)
-
-
-dev-logs:
-	$(call run_docker_compose,$(PREFIX_DEV),$(DOCKER_COMPOSE_DEV_FILE),logs,$(s))
+# show docker-compose configuration
+.PHONEY: config
+config:
+	$(call log, Docker-compose configuration (${CURRENT_ENVIRONMENT_PREFIX}))
+	$(call run_docker_compose_for_current_env, config)
 
 
 fake:
@@ -155,7 +238,3 @@ fake:
 	@CH_LOCAL_MODE=true python src/db_upgrade.py
 	$(call log,"Запускаю загрузку данных")
 	python src/load_data.py
-
-
-ch-db-upgrade-local:
-	@CH_LOCAL_MODE=true python src/db_upgrade.py

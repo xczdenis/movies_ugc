@@ -1,6 +1,6 @@
 from adapters.enums import DBDialects
 
-from settings import ch_settings
+from src.config.settings import ch_settings
 from utils import get_db_client, migrate, get_databases
 
 if __name__ == "__main__":

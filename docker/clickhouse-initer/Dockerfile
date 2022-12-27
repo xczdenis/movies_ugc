@@ -1,4 +1,4 @@
-FROM python:3.10.0-slim-buster as base
+FROM python:3.10.0-slim as base
 
 ENV HOME_DIR=app \
     PROJECT_PACKAGE=src \
@@ -11,8 +11,8 @@ FROM base as builder
 
 WORKDIR /$HOME_DIR
 
-COPY ./docker/clickhouse/scripts /scripts
-COPY ./scripts/wait-for-it.sh /scripts/wait-for-it.sh
+COPY ./docker/scripts /scripts
+COPY ./docker/clickhouse-initer/scripts /scripts
 RUN chmod -R 777 /scripts
 
 RUN apt-get update \
@@ -38,4 +38,5 @@ COPY --from=builder /$HOME_DIR /$HOME_DIR
 
 WORKDIR /$HOME_DIR/$PROJECT_PACKAGE
 
-ENTRYPOINT ["/scripts/entrypoint.sh"]
+#ENTRYPOINT ["/scripts/entrypoint.sh"]
+ENTRYPOINT ["/scripts/start.sh"]

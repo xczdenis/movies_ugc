@@ -4,8 +4,8 @@ from typing import Any
 
 from pydantic import BaseSettings
 
-BASE_DIR = Path(__file__).resolve().parent
-ROOT_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 class OLAPResearchSettings(BaseSettings):
@@ -27,6 +27,7 @@ class CHSettings(BaseSettings):
     CH_NODE_EXPOSE_PORTS: list[int]
     CH_CONFIG_PATH: str
     CH_LOCAL_MODE: bool = False
+    ENVIRONMENT: str = ""
 
     class Config:
         env_file = os.path.join(ROOT_DIR, ".env")
