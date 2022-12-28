@@ -1,27 +1,53 @@
+<!--<clickhouse>-->
+<!--    <remote_servers>-->
+<!--        <main_cluster>-->
+<!--            <shard>-->
+<!--                <replica>-->
+<!--                    <default_database from_env="CH_DB_NAME"/>-->
+<!--                    <host>clickhouse-node1</host>-->
+<!--                    <port from_env="CH_NODE_PORT"/>-->
+<!--                </replica>-->
+<!--                <replica>-->
+<!--                    <default_database from_env="CH_REPLICA_DB_NAME"/>-->
+<!--                    <host>clickhouse-node2</host>-->
+<!--                    <port from_env="CH_NODE_PORT"/>-->
+<!--                </replica>-->
+<!--            </shard>-->
+<!--            <shard>-->
+<!--                <replica>-->
+<!--                    <default_database from_env="CH_DB_NAME"/>-->
+<!--                    <host>clickhouse-node3</host>-->
+<!--                    <port from_env="CH_NODE_PORT"/>-->
+<!--                </replica>-->
+<!--                <replica>-->
+<!--                    <default_database from_env="CH_REPLICA_DB_NAME"/>-->
+<!--                    <host>clickhouse-node4</host>-->
+<!--                    <port from_env="CH_NODE_PORT"/>-->
+<!--                </replica>-->
+<!--            </shard>-->
+<!--        </main_cluster>-->
+<!--    </remote_servers>-->
+<!--</clickhouse>-->
 <clickhouse>
     <remote_servers>
         <main_cluster>
             <shard>
                 <replica>
-                    <default_database from_env="CH_DB_NAME"/>
-                    <host>clickhouse-node1</host>
+                    <host>clickhouse-shard1-node1</host>
                     <port from_env="CH_NODE_PORT"/>
                 </replica>
                 <replica>
-                    <default_database from_env="CH_REPLICA_DB_NAME"/>
-                    <host>clickhouse-node2</host>
+                    <host>clickhouse-shard1-node1-replica</host>
                     <port from_env="CH_NODE_PORT"/>
                 </replica>
             </shard>
             <shard>
                 <replica>
-                    <default_database from_env="CH_DB_NAME"/>
-                    <host>clickhouse-node3</host>
+                    <host>clickhouse-shard2-node1</host>
                     <port from_env="CH_NODE_PORT"/>
                 </replica>
                 <replica>
-                    <default_database from_env="CH_REPLICA_DB_NAME"/>
-                    <host>clickhouse-node4</host>
+                    <host>clickhouse-shard2-node1-replica</host>
                     <port from_env="CH_NODE_PORT"/>
                 </replica>
             </shard>

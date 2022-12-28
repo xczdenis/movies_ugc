@@ -56,7 +56,7 @@ class ClickHouseMigrator(BaseDBMigrator):
     def create_table(self, db: str, table: Type[Model]):
         table_instance = table()
         query = (
-            """CREATE TABLE IF NOT EXISTS {db}.{table} {fields} {extra_args};""".format(
+            """CREATE TABLE IF NOT EXISTS {db}.{table} ON CLUSTER main_cluster {fields} {extra_args};""".format(
                 db=db,
                 table=table.__tablename__,
                 fields=table_instance.get_sql_fields(self.dialect),
