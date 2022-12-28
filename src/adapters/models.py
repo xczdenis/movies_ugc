@@ -19,7 +19,9 @@ class ViewMixin(object):
 class View(ViewMixin, Model):
     __table_args__: dict = field(
         default_factory=lambda: {
-            "ENGINE =": "ReplicatedMergeTree('/clickhouse/tables/shard{shard}/{table}', '{replica}')",
+            # "ENGINE =": "ReplicatedMergeTree('/clickhouse/tables/shard{shard}/{table}', '{replica}')",
+            # "ENGINE =": "MergeTree",
+            "ENGINE =": "ReplicatedMergeTree('/clickhouse/tables/{shard}/db_uuid/{uuid}', '{replica}')",
             "PARTITION BY": "toYYYYMMDD(created)",
             "PRIMARY KEY": "(id)",
             "ORDER BY": "id",
@@ -27,11 +29,11 @@ class View(ViewMixin, Model):
     )
 
 
-@dataclass
-class DistributedView(ViewMixin, Model):
-    __table_args__: dict = field(
-        default_factory=lambda: {
-            "is_distributed": True,
-            "ENGINE =": "Distributed('$cluster', '', $table, rand())",
-        }
-    )
+# @dataclass
+# class DistributedView(ViewMixin, Model):
+#     __table_args__: dict = field(
+#         default_factory=lambda: {
+#             "is_distributed": True,
+#             "ENGINE =": "Distributed('$cluster', '', $table, rand())",
+#         }
+#     )

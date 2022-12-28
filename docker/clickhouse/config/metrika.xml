@@ -47,6 +47,9 @@
             <cluster from_env="CH_CLUSTER_NAME"/>
         </macros>
 
+        <default_replica_path>/clickhouse/tables/{shard}/{uuid}</default_replica_path>
+        <default_replica_name>{replica}</default_replica_name>
+
         <format_schema_path>/var/lib/clickhouse/format_schemas/</format_schema_path>
 
         <builtin_dictionaries_reload_interval>3600</builtin_dictionaries_reload_interval>

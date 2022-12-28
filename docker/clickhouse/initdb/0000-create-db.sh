@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+
+clickhouse client -n <<-EOSQL
+	CREATE DATABASE IF NOT EXISTS $CH_DB_NAME ON CLUSTER $CH_CLUSTER_NAME ENGINE Atomic;
+EOSQL

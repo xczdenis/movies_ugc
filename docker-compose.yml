@@ -13,8 +13,8 @@ x-clickhouse-default-node: &clickhouse-default-node
     env_file: .env
     healthcheck:
         test: [ "CMD", "/scripts/wait-for-it.sh", "${CH_NODE_HOST_NAME}:${CH_NODE_PORT}" ]
-        interval: 15s
-        timeout: 15s
+        interval: 5s
+        timeout: 5s
         retries: 5
 
 x-clickhouse-default-node-keeper: &clickhouse-default-node-keeper
@@ -32,66 +32,101 @@ services:
                 - CH_SERVER_IMG_VER=${CH_SERVER_IMG_VER}
         image: clickhouse-default-node
         volumes:
-            - ch_default_node_1:/var/lib/clickhouse
+            - clickhouse_default_node_data:/var/lib/clickhouse
 
     clickhouse-default-node-keeper:
         <<: *default-service
         build:
             context: .
-            dockerfile: ./docker/clickhouse/node-with-keeper.Dockerfile
+            dockerfile: ./docker/clickhouse/node-keeper.Dockerfile
             args:
                 - CH_SERVER_IMG_VER=${CH_SERVER_IMG_VER}
         image: clickhouse-default-node-keeper
         volumes:
-            - ch_default_node_2:/var/lib/clickhouse
+            - clickhouse_default_node_keeper_data:/var/lib/clickhouse
 
-    clickhouse-node1:
+    clickhouse-shard1-node1:
         <<: *clickhouse-default-node-keeper
         environment:
-            CH_NODE_HOST_NAME: clickhouse-node1
-            CH_NODE_REPLICA_NAME: clickhouse-node1
-            CH_NODE_SHARD_ID: 01
+            CH_NODE_HOST_NAME: clickhouse-shard1-node1
+            CH_NODE_SHARD_ID: 1
+            CH_NODE_REPLICA_NAME: clickhouse-shard1-node1
             CH_KEEPER_SERVER_ID: 1
 
-    clickhouse-node2:
-        <<: *clickhouse-default-node-keeper
-        environment:
-            CH_NODE_HOST_NAME: clickhouse-node2
-            CH_NODE_REPLICA_NAME: clickhouse-node2
-            CH_NODE_SHARD_ID: 01
-            CH_KEEPER_SERVER_ID: 2
-
-    clickhouse-node3:
-        <<: *clickhouse-default-node-keeper
-        environment:
-            CH_NODE_HOST_NAME: clickhouse-node3
-            CH_NODE_REPLICA_NAME: clickhouse-node3
-            CH_NODE_SHARD_ID: 02
-            CH_KEEPER_SERVER_ID: 3
-
-    clickhouse-node4:
+    clickhouse-shard1-node1-replica:
         <<: *clickhouse-default-node
         environment:
-            CH_NODE_HOST_NAME: clickhouse-node4
-            CH_NODE_REPLICA_NAME: clickhouse-node4
-            CH_NODE_SHARD_ID: 02
+            CH_NODE_HOST_NAME: clickhouse-shard1-node1-replica
+            CH_NODE_SHARD_ID: 1
+            CH_NODE_REPLICA_NAME: clickhouse-shard1-node1-replica
+        depends_on:
+            clickhouse-keeper-quorum:
+                condition: service_healthy
+            clickhouse-shard1-node1:
+                condition: service_healthy
+
+    clickhouse-shard2-node1:
+        <<: *clickhouse-default-node-keeper
+        environment:
+            CH_NODE_HOST_NAME: clickhouse-shard2-node1
+            CH_NODE_SHARD_ID: 2
+            CH_NODE_REPLICA_NAME: clickhouse-shard2-node1
+            CH_KEEPER_SERVER_ID: 2
+
+    clickhouse-shard2-node1-replica:
+        <<: *clickhouse-default-node
+        environment:
+            CH_NODE_HOST_NAME: clickhouse-shard2-node1-replica
+            CH_NODE_SHARD_ID: 2
+            CH_NODE_REPLICA_NAME: clickhouse-shard2-node1-replica
+        depends_on:
+            clickhouse-keeper-quorum:
+                condition: service_healthy
+            clickhouse-shard2-node1:
+                condition: service_healthy
+
+    clickhouse-keeper-quorum:
+        <<: *clickhouse-default-node-keeper
+        environment:
+            CH_NODE_HOST_NAME: clickhouse-keeper-quorum
+            CH_NODE_SHARD_ID: 0
+            CH_NODE_REPLICA_NAME: clickhouse-keeper-quorum
+            CH_KEEPER_SERVER_ID: 3
+        volumes:
+            - clickhouse_keeper_quorum_data:/var/lib/clickhouse
+        depends_on:
+            - clickhouse-shard1-node1
+            - clickhouse-shard2-node1
 
     clickhouse-initer:
         <<: *base-service
+        env_file: .env
         build:
             context: .
-            dockerfile: ./docker/clickhouse-initer/Dockerfile
-        env_file: .env
+            dockerfile: ./docker/clickhouse/initer.Dockerfile
+            args:
+                - CH_SERVER_IMG_VER=${CH_SERVER_IMG_VER}
+        environment:
+            CH_LOG_LEVEL: Information
+            CH_NODE_HOST_NAME: clickhouse-initer
+            CH_NODE_SHARD_ID: 0
+            CH_NODE_REPLICA_NAME: clickhouse-initer
         depends_on:
-            clickhouse-node1:
+            clickhouse-shard1-node1:
                 condition: service_healthy
-            clickhouse-node2:
+            clickhouse-shard1-node1-replica:
                 condition: service_healthy
-            clickhouse-node3:
+            clickhouse-shard2-node1:
                 condition: service_healthy
-            clickhouse-node4:
+            clickhouse-shard2-node1-replica:
                 condition: service_healthy
+            clickhouse-keeper-quorum:
+                condition: service_healthy
+        volumes:
+            - clickhouse_initer_data:/var/lib/clickhouse
 
 volumes:
-    ch_default_node_1:
-    ch_default_node_2:
+    clickhouse_default_node_data:
+    clickhouse_default_node_keeper_data:
+    clickhouse_keeper_quorum_data:
+    clickhouse_initer_data:

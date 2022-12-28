@@ -1,7 +1,7 @@
 import json
 
 from adapters.enums import DBDialects
-from src.config.settings import ch_settings, BASE_DIR
+from config.settings import ch_settings, BASE_DIR
 from utils import get_db_client, migrate, get_databases
 
 if __name__ == "__main__":
