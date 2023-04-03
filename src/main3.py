@@ -24,7 +24,5 @@ with DatabaseClientContextManager(db_client=clickhouse_client):
            ('clickhouse.com', '2020-01-01 00:00:00', 6);
     """
 
-
     r = clickhouse_client.execute(query)
     logger.debug(r)
-
