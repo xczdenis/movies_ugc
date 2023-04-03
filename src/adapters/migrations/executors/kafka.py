@@ -74,5 +74,3 @@ class KafkaSchemaCreator(MigrationExecutor):
     @staticmethod
     def parse_query(text: str) -> dict:
         return json.loads(text)
-
-

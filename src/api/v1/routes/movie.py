@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Depends
 
 from api.utils import make_rout_name
-from api.v1.schemas.movies import MoviePlaybackEventRequest, CurrentPlaybackPositionRequest, \
-    MovieViewingRequest
+from api.v1.schemas.movies import (
+    MoviePlaybackEventRequest,
+    CurrentPlaybackPositionRequest,
+    MovieViewingRequest,
+)
 from dependencies.interactors import get_movie_viewing_service
 from internal.services.movie_viewing import MovieViewingService
 from models.movies import MoviePlaybackEvent, Movie, CurrentPlaybackPosition, MovieViewing
