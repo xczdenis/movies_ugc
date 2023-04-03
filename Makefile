@@ -13,6 +13,7 @@ DOCKER_COMPOSE_TEST_FILE=docker-compose.test.yml
 DOCKER_COMPOSE_TEST_DEV_FILE=docker-compose.test.dev.yml
 
 COMPOSE_OPTION_START_AS_DEMON=up -d --build
+COMPOSE_PROFILE_DEFAULT=""--profile default""
 
 # define standard colors
 ifneq (,$(findstring xterm,${TERM}))
@@ -148,7 +149,8 @@ remove:
 	@echo "Будут удалены все незапущенные контейнеры, все образы для незапущенных контейнеров и все тома для незапущенных контейнеров"
 	@read -p "${ORANGE}Вы точно уверены, что хотите продолжить? [yes/n]: ${RESET}" TAG \
 	&& if [ "_$${TAG}" != "_yes" ]; then echo aborting; exit 1 ; fi
-	docker system prune -a -f --volumes
+	docker-compose down --rmi all --volumes --remove-orphans && docker system prune -a --volumes --force
+
 
 
 # stop and remove all running containers
@@ -159,14 +161,14 @@ down:
 	@make down-dev
 	@make down-test
 down-prod:
-	$(call run_docker_compose_for_env, ${PREFIX_PROD}, ${DOCKER_COMPOSE_PROD_FILE}, down)
-	$(call run_docker_compose_for_env, "_", ${DOCKER_COMPOSE_PROD_FILE}, down)
+	$(call run_docker_compose_for_env, "${PREFIX_PROD}", "${DOCKER_COMPOSE_PROD_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
+	$(call run_docker_compose_for_env, "_", "${DOCKER_COMPOSE_PROD_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
 down-dev:
-	$(call run_docker_compose_for_env, ${PREFIX_DEV}, ${DOCKER_COMPOSE_DEV_FILE}, down)
-	$(call run_docker_compose_for_env, "_", ${DOCKER_COMPOSE_DEV_FILE}, down)
+	$(call run_docker_compose_for_env, "${PREFIX_DEV}", "${DOCKER_COMPOSE_DEV_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
+	$(call run_docker_compose_for_env, "_", "${DOCKER_COMPOSE_DEV_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
 down-test:
-	$(call run_docker_compose_for_env, ${PREFIX_TEST}, ${DOCKER_COMPOSE_TEST_FILE}, down)
-	$(call run_docker_compose_for_env, "_", ${DOCKER_COMPOSE_TEST_FILE}, down)
+	$(call run_docker_compose_for_env, "${PREFIX_TEST}", "${DOCKER_COMPOSE_TEST_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
+	$(call run_docker_compose_for_env, "_", "${DOCKER_COMPOSE_TEST_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
 
 
 # build and run docker containers in demon mode
@@ -174,6 +176,20 @@ down-test:
 run: down
 	$(call log, Run containers (${CURRENT_ENVIRONMENT_PREFIX}))
 	$(call run_docker_compose_for_current_env, ${COMPOSE_OPTION_START_AS_DEMON} ${s})
+
+
+# build and run docker containers in demon mode for oltp profile
+.PHONEY: run-oltp
+run-oltp: down
+	$(call log, Run containers (${CURRENT_ENVIRONMENT_PREFIX}))
+	$(call run_docker_compose_for_current_env, --profile oltp ${COMPOSE_OPTION_START_AS_DEMON} ${s})
+
+
+# build and run docker containers in demon mode for olap profile
+.PHONEY: run-olap
+run-olap: down
+	$(call log, Run containers (${CURRENT_ENVIRONMENT_PREFIX}))
+	$(call run_docker_compose_for_current_env, --profile olap ${COMPOSE_OPTION_START_AS_DEMON} ${s})
 
 
 # show container's logs
@@ -220,7 +236,7 @@ _stop:
 .PHONEY: config
 config:
 	$(call log, Docker-compose configuration (${CURRENT_ENVIRONMENT_PREFIX}))
-	$(call run_docker_compose_for_current_env, config)
+	$(call run_docker_compose_for_current_env, ${COMPOSE_PROFILE_DEFAULT} config)
 
 
 fake:

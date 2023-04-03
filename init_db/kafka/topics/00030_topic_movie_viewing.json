@@ -1,0 +1,8 @@
+{
+    "name": "$KAFKA_TOPIC_MOVIE_VIEWING",
+    "num_partitions": 1,
+    "cleanup_policy": "delete",
+    "min_in_sync_replicas": 1,
+    "replication_factor": 1,
+    "time_to_retain_data_ms": 604800000
+}

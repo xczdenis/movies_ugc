@@ -1,5 +1,17 @@
+x-profiles-olap: &profiles-olap
+    profiles:
+        - default
+        - olap
+
+x-profiles-oltp: &profiles-oltp
+    profiles:
+        - default
+        - oltp
+
 x-base-service: &base-service
-    platform: "linux/amd64"
+    platform: ${DOCKER_IMG_PLATFORM:-linux/amd64}
+    profiles:
+        - default
 
 x-default-service: &default-service
     <<: *base-service
@@ -12,81 +24,126 @@ x-clickhouse-default-node: &clickhouse-default-node
     image: clickhouse-default-node
     env_file: .env
     healthcheck:
-        test: [ "CMD", "/scripts/wait-for-it.sh", "${CH_NODE_HOST_NAME}:${CH_NODE_PORT}" ]
+      &clickhouse-common-healthcheck
         interval: 5s
         timeout: 5s
-        retries: 5
+        retries: 10
 
-x-clickhouse-default-node-keeper: &clickhouse-default-node-keeper
+x-clickhouse-default-node-with-keeper: &clickhouse-default-node-with-keeper
     <<: *clickhouse-default-node
-    image: clickhouse-default-node-keeper
+    image: clickhouse-default-node-with-keeper
 
+x-kafka-default-broker: &kafka-default-broker
+    <<: *base-service
+    profiles:
+        - default
+        - oltp
+    build:
+        context: .
+        dockerfile: ./docker/kafka/broker/Dockerfile
+    env_file: .env
+    environment:
+      &kafka-default-broker-env
+        KAFKA_ENABLE_KRAFT: yes
+        KAFKA_CFG_PROCESS_ROLES: broker,controller
+        KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+        KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+        KAFKA_CFG_LISTENERS: CONTROLLER://:${KAFKA_BROKER_CONTROLLER_PORT},CLIENT://:${KAFKA_BROKER_CLIENT_PORT},EXTERNAL://:${KAFKA_BROKER_EXTERNAL_PORT}
+        KAFKA_CFG_INTER_BROKER_LISTENER_NAME: CLIENT
+        ALLOW_PLAINTEXT_LISTENER: yes
+    healthcheck:
+      &kafka-common-healthcheck
+        interval: 5s
+        timeout: 5s
+        retries: 10
 
 services:
+    # =======================================
+    # OLAP
+    # =======================================
     clickhouse-default-node:
         <<: *default-service
+        <<: *profiles-olap
         build:
             context: .
             dockerfile: ./docker/clickhouse/node.Dockerfile
             args:
-                - CH_SERVER_IMG_VER=${CH_SERVER_IMG_VER}
+                - CH_SERVER_IMG=${CH_SERVER_IMG}
         image: clickhouse-default-node
         volumes:
             - clickhouse_default_node_data:/var/lib/clickhouse
 
-    clickhouse-default-node-keeper:
+    clickhouse-default-node-with-keeper:
         <<: *default-service
+        <<: *profiles-olap
         build:
             context: .
             dockerfile: ./docker/clickhouse/node-keeper.Dockerfile
             args:
-                - CH_SERVER_IMG_VER=${CH_SERVER_IMG_VER}
-        image: clickhouse-default-node-keeper
+                - CH_SERVER_IMG=${CH_SERVER_IMG}
+        image: clickhouse-default-node-with-keeper
         volumes:
-            - clickhouse_default_node_keeper_data:/var/lib/clickhouse
+            - clickhouse_default_node_with_keeper_data:/var/lib/clickhouse
 
-    clickhouse-shard1-node1:
-        <<: *clickhouse-default-node-keeper
+    clickhouse-shard1:
+        <<: *clickhouse-default-node-with-keeper
+        <<: *profiles-olap
         environment:
-            CH_NODE_HOST_NAME: clickhouse-shard1-node1
+            CH_NODE_HOST_NAME: clickhouse-shard1
             CH_NODE_SHARD_ID: 1
-            CH_NODE_REPLICA_NAME: clickhouse-shard1-node1
+            CH_NODE_REPLICA_NAME: clickhouse-shard1
             CH_KEEPER_SERVER_ID: 1
+        healthcheck:
+            test: [ "CMD", "/scripts/wait-for-it.sh", "clickhouse-shard1:${CH_NODE_PORT}" ]
+            <<: *clickhouse-common-healthcheck
 
-    clickhouse-shard1-node1-replica:
+    clickhouse-shard1-replica1:
         <<: *clickhouse-default-node
+        <<: *profiles-olap
         environment:
-            CH_NODE_HOST_NAME: clickhouse-shard1-node1-replica
+            CH_NODE_HOST_NAME: clickhouse-shard1-replica1
             CH_NODE_SHARD_ID: 1
-            CH_NODE_REPLICA_NAME: clickhouse-shard1-node1-replica
+            CH_NODE_REPLICA_NAME: clickhouse-shard1-replica1
+        healthcheck:
+            test: [ "CMD", "/scripts/wait-for-it.sh", "clickhouse-shard1-replica1:${CH_NODE_PORT}" ]
+            <<: *clickhouse-common-healthcheck
         depends_on:
             clickhouse-keeper-quorum:
                 condition: service_healthy
-            clickhouse-shard1-node1:
+            clickhouse-shard1:
                 condition: service_healthy
 
-    clickhouse-shard2-node1:
-        <<: *clickhouse-default-node-keeper
+    clickhouse-shard2:
+        <<: *clickhouse-default-node-with-keeper
+        <<: *profiles-olap
         environment:
-            CH_NODE_HOST_NAME: clickhouse-shard2-node1
+            CH_NODE_HOST_NAME: clickhouse-shard2
             CH_NODE_SHARD_ID: 2
-            CH_NODE_REPLICA_NAME: clickhouse-shard2-node1
+            CH_NODE_REPLICA_NAME: clickhouse-shard2
             CH_KEEPER_SERVER_ID: 2
+        healthcheck:
+            test: [ "CMD", "/scripts/wait-for-it.sh", "clickhouse-shard2:${CH_NODE_PORT}" ]
+            <<: *clickhouse-common-healthcheck
 
-    clickhouse-shard2-node1-replica:
+    clickhouse-shard2-replica1:
         <<: *clickhouse-default-node
+        <<: *profiles-olap
         environment:
-            CH_NODE_HOST_NAME: clickhouse-shard2-node1-replica
+            CH_NODE_HOST_NAME: clickhouse-shard2-replica1
             CH_NODE_SHARD_ID: 2
-            CH_NODE_REPLICA_NAME: clickhouse-shard2-node1-replica
+            CH_NODE_REPLICA_NAME: clickhouse-shard2-replica1
+        healthcheck:
+            test: [ "CMD", "/scripts/wait-for-it.sh", "clickhouse-shard2-replica1:${CH_NODE_PORT}" ]
+            <<: *clickhouse-common-healthcheck
         depends_on:
             clickhouse-keeper-quorum:
                 condition: service_healthy
-            clickhouse-shard2-node1:
+            clickhouse-shard2:
                 condition: service_healthy
 
     clickhouse-keeper-quorum:
-        <<: *clickhouse-default-node-keeper
+        <<: *clickhouse-default-node-with-keeper
+        <<: *profiles-olap
         environment:
             CH_NODE_HOST_NAME: clickhouse-keeper-quorum
             CH_NODE_SHARD_ID: 0
@@ -94,39 +151,127 @@ services:
             CH_KEEPER_SERVER_ID: 3
         volumes:
             - clickhouse_keeper_quorum_data:/var/lib/clickhouse
+        healthcheck:
+            test: [ "CMD", "/scripts/wait-for-it.sh", "clickhouse-keeper-quorum:${CH_NODE_PORT}" ]
+            <<: *clickhouse-common-healthcheck
         depends_on:
-            - clickhouse-shard1-node1
-            - clickhouse-shard2-node1
+            - clickhouse-shard1
+            - clickhouse-shard2
 
     clickhouse-initer:
         <<: *base-service
+        <<: *profiles-olap
         env_file: .env
         build:
             context: .
-            dockerfile: ./docker/clickhouse/initer.Dockerfile
+            dockerfile: ./docker/clickhouse/initer/Dockerfile
             args:
-                - CH_SERVER_IMG_VER=${CH_SERVER_IMG_VER}
+                env: ${ENVIRONMENT}
         environment:
-            CH_LOG_LEVEL: Information
-            CH_NODE_HOST_NAME: clickhouse-initer
-            CH_NODE_SHARD_ID: 0
-            CH_NODE_REPLICA_NAME: clickhouse-initer
+            CH_NODE_HOST: clickhouse-shard1
+            CH_NODE_PORT: ${CH_NODE_PORT}
         depends_on:
-            clickhouse-shard1-node1:
+            clickhouse-shard1:
                 condition: service_healthy
-            clickhouse-shard1-node1-replica:
+            clickhouse-shard1-replica1:
                 condition: service_healthy
-            clickhouse-shard2-node1:
+            clickhouse-shard2:
                 condition: service_healthy
-            clickhouse-shard2-node1-replica:
+            clickhouse-shard2-replica1:
                 condition: service_healthy
             clickhouse-keeper-quorum:
                 condition: service_healthy
-        volumes:
-            - clickhouse_initer_data:/var/lib/clickhouse
+
+    # =======================================
+    # app
+    # =======================================
+    app:
+        <<: *base-service
+        <<: *profiles-oltp
+        env_file: .env
+        build:
+            context: .
+            dockerfile: ./docker/app/Dockerfile
+            args:
+                env: ${ENVIRONMENT}
+        environment:
+            APP_HOST: 0.0.0.0
+            APP_PORT: 8000
+            KAFKA_CONNECTION_HOST: kafka-broker
+            KAFKA_CONNECTION_PORT: ${KAFKA_BROKER_CLIENT_PORT}
+            KAFKA_SCHEMA_REGISTRY_CONNECTION_HOST: kafka-schema-registry
+            KAFKA_SCHEMA_REGISTRY_CONNECTION_PORT: ${KAFKA_SCHEMA_REGISTRY_PORT}
+        depends_on:
+            kafka-broker:
+                condition: service_healthy
+            kafka-schema-registry:
+                condition: service_healthy
+
+    # =======================================
+    # OLTP
+    # =======================================
+    kafka-broker:
+        <<: *kafka-default-broker
+        environment:
+            <<: *kafka-default-broker-env
+            KAFKA_BROKER_HOST: kafka-broker
+            KAFKA_CFG_BROKER_ID: 1
+            KAFKA_CFG_ADVERTISED_LISTENERS: CLIENT://kafka-broker:${KAFKA_BROKER_CLIENT_PORT},EXTERNAL://localhost:${KAFKA_BROKER_EXTERNAL_PORT}
+            KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka-broker:${KAFKA_BROKER_CONTROLLER_PORT}
+        healthcheck:
+            test: [ "CMD", "/scripts/wait-for-it.sh", "kafka-broker:${KAFKA_BROKER_CLIENT_PORT}" ]
+            <<: *kafka-common-healthcheck
+
+    kafka-schema-registry:
+        <<: *base-service
+        <<: *profiles-oltp
+        build:
+            context: .
+            dockerfile: ./docker/kafka/schema_registry/Dockerfile
+        environment:
+            SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:${KAFKA_SCHEMA_REGISTRY_PORT}
+            SCHEMA_REGISTRY_KAFKA_BROKERS: PLAINTEXT://kafka-broker:${KAFKA_BROKER_CLIENT_PORT}
+        depends_on:
+            kafka-broker:
+                condition: service_healthy
+        healthcheck:
+            test: [ "CMD", "/scripts/wait-for-it.sh", "kafka-schema-registry:${KAFKA_SCHEMA_REGISTRY_PORT}" ]
+            <<: *kafka-common-healthcheck
+
+    kafka-ui:
+        <<: *base-service
+        <<: *profiles-oltp
+        image: provectuslabs/kafka-ui:v0.6.0
+        environment:
+            KAFKA_CLUSTERS_0_NAME: kraft
+            KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker:${KAFKA_BROKER_CLIENT_PORT}
+            KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://kafka-schema-registry:${KAFKA_SCHEMA_REGISTRY_PORT}
+        depends_on:
+            kafka-broker:
+                condition: service_healthy
+
+    kafka-initer:
+        <<: *base-service
+        <<: *profiles-oltp
+        env_file: .env
+        build:
+            context: .
+            dockerfile: ./docker/kafka/initer/Dockerfile
+            args:
+                env: ${ENVIRONMENT}
+        environment:
+            KAFKA_CONNECTION_HOST: kafka-broker
+            KAFKA_CONNECTION_PORT: ${KAFKA_BROKER_CLIENT_PORT}
+            KAFKA_SCHEMA_REGISTRY_CONNECTION_HOST: kafka-schema-registry
+            KAFKA_SCHEMA_REGISTRY_CONNECTION_PORT: ${KAFKA_SCHEMA_REGISTRY_PORT}
+        depends_on:
+            kafka-broker:
+                condition: service_healthy
+            kafka-schema-registry:
+                condition: service_healthy
 
 volumes:
     clickhouse_default_node_data:
-    clickhouse_default_node_keeper_data:
+    clickhouse_default_node_with_keeper_data:
     clickhouse_keeper_quorum_data:
     clickhouse_initer_data:

@@ -1,0 +1,10 @@
+color_red="\033[31m"
+color_green="\033[32m"
+color_blue="\033[94m"
+color_white="\033[97m"
+
+color_info="\033[00m"
+color_debug="${color_blue}"
+color_success="${color_green}"
+color_error="${color_red}"
+color_reset="\033[00m"

@@ -1,0 +1,43 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "$KAFKA_SCHEMA_MOVIE_PLAYBACK_EVENT",
+    "type": "object",
+    "properties": {
+        "user": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "format": "uuid"
+                }
+            },
+            "required": [
+                "id"
+            ]
+        },
+        "movie": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "format": "uuid"
+                }
+            },
+            "required": [
+                "id"
+            ]
+        },
+        "event_type": {
+            "type": "string"
+        },
+        "playback_position": {
+            "type": "integer"
+        }
+    },
+    "required": [
+        "user",
+        "movie",
+        "event_type",
+        "playback_position"
+    ]
+}

@@ -14,12 +14,12 @@
         <raft_configuration>
             <server>
                 <id>1</id>
-                <hostname>clickhouse-shard1-node1</hostname>
+                <hostname>clickhouse-shard1</hostname>
                 <port from_env="CH_KEEPER_RAFT_SERVER_PORT"/>
             </server>
             <server>
                 <id>2</id>
-                <hostname>clickhouse-shard2-node1</hostname>
+                <hostname>clickhouse-shard2</hostname>
                 <port from_env="CH_KEEPER_RAFT_SERVER_PORT"/>
             </server>
             <server>
