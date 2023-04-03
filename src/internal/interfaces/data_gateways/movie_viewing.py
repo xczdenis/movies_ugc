@@ -1,7 +1,7 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 
 from internal.interfaces.data_gateways.base import DataGatewayConnector
-from models.movies import MoviePlaybackEvent, CurrentPlaybackPosition, MovieViewing
+from models.movies import CurrentPlaybackPosition, MoviePlaybackEvent, MovieViewing
 
 
 class MovieViewingGateway(DataGatewayConnector, ABC):

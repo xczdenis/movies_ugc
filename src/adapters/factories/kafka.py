@@ -1,5 +1,8 @@
 from adapters.data_gateways.movie_viewing import KafkaMovieViewingGateway
-from adapters.db_clients.kafka import KafkaEventProducerClient, KafkaSchemaRegistryClient
+from adapters.db_clients.kafka import (
+    KafkaEventProducerClient,
+    KafkaSchemaRegistryClient,
+)
 from app.factories import DatabaseClientFactory, DataGatewayFactory
 from config.settings import kafka_settings
 from internal.interfaces.data_gateways.movie_viewing import MovieViewingGateway

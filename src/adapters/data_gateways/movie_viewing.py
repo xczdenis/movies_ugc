@@ -9,7 +9,7 @@ from adapters.mapings import topic_schema_mapping
 from internal.exceptions import ValidationDataError
 from internal.interfaces.data_gateways.movie_viewing import MovieViewingGateway
 from internal.interfaces.db import EventProducerClient
-from models.movies import MoviePlaybackEvent, CurrentPlaybackPosition, MovieViewing
+from models.movies import CurrentPlaybackPosition, MoviePlaybackEvent, MovieViewing
 
 
 class KafkaMovieViewingGateway(MovieViewingGateway):

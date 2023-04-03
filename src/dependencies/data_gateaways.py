@@ -1,5 +1,3 @@
-from loguru import logger
-
 from internal.interfaces.data_gateways.movie_viewing import MovieViewingGateway
 
 movie_viewing_gateway: MovieViewingGateway | None = None

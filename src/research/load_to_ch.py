@@ -3,13 +3,13 @@ import hashlib
 import time
 import uuid
 from collections.abc import Iterable
-from functools import wraps, lru_cache
+from functools import lru_cache, wraps
 from multiprocessing import Pool, cpu_count
 
 from loguru import logger
 
 from adapters.db_clients.clickhouse import ClickhouseDBClient
-from config.settings import ch_settings, ROOT_DIR
+from config.settings import ROOT_DIR, ch_settings
 from internal.interfaces.context_managers import DatabaseClientContextManager
 from internal.interfaces.db import SQLDatabaseClient
 

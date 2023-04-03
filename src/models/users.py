@@ -1,4 +1,4 @@
-from models.mixins import StrUUIDMixin, OrjsonConfigMixin
+from models.mixins import OrjsonConfigMixin, StrUUIDMixin
 
 
 class User(StrUUIDMixin, OrjsonConfigMixin):

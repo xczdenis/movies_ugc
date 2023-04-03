@@ -28,7 +28,7 @@ RUN apt-get update \
 COPY pyproject.toml poetry.lock README.md ./
 
 RUN poetry config virtualenvs.in-project true \
-    && poetry install
+    && poetry install --only main
 
 
 FROM base as final
