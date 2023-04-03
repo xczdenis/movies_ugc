@@ -1,0 +1,84 @@
+from abc import ABC, abstractmethod
+from urllib.parse import urlparse, parse_qs
+
+
+class DatabaseClient(ABC):
+    @property
+    @abstractmethod
+    def host(self) -> str:
+        ...
+
+    @property
+    @abstractmethod
+    def port(self) -> int:
+        ...
+
+    @abstractmethod
+    def get_db_name(self) -> str:
+        ...
+
+    @abstractmethod
+    async def connect(self, **kwargs):
+        ...
+
+    @abstractmethod
+    async def close(self, **kwargs):
+        ...
+
+    @abstractmethod
+    async def is_healthy(self, **kwargs):
+        ...
+
+    @classmethod
+    def from_url(cls, url: str):
+        """
+        Return a client configured from the given URL.
+
+        For example::
+
+            clickhouse://[user:password]@localhost:9000/default
+            postgres://[user:password]@localhost:9440/default
+            kafka://[user:password]@localhost:9440/default
+        """
+        parsed_url = urlparse(url)
+
+        init_args = {}
+
+        cls.__add_url_attr_to_init_args(parsed_url, "hostname", "host", init_args)
+        cls.__add_url_attr_to_init_args(parsed_url, "port", "port", init_args)
+        cls.__add_url_attr_to_init_args(parsed_url, "username", "user", init_args)
+        cls.__add_url_attr_to_init_args(parsed_url, "password", "password", init_args)
+        cls.__add_url_attr_to_init_args(parsed_url, "scheme", "scheme", init_args)
+
+        path = parsed_url.path.replace("/", "", 1)
+        if path and hasattr(cls, "database"):
+            init_args["database"] = path
+
+        for name, value in parse_qs(parsed_url.query).items():
+            if not value or not len(value) or not hasattr(cls, name):
+                continue
+
+            value = value[0]
+
+            init_args[name] = value
+
+        return cls(**init_args)
+
+    @classmethod
+    def __add_url_attr_to_init_args(cls, parsed_url, url_attr_name: str, cls_attr_name: str, kwargs: dict):
+        if hasattr(cls, cls_attr_name):
+            value = getattr(parsed_url, url_attr_name)
+            if value is not None:
+                kwargs[cls_attr_name] = value
+
+
+class SQLDatabaseClient(DatabaseClient, ABC):
+    @abstractmethod
+    async def execute(self, query: str, *args, **kwargs):
+        ...
+
+
+class EventProducerClient(DatabaseClient, ABC):
+    @abstractmethod
+    async def send(self, data: dict, destination: str, **kwargs):
+        ...

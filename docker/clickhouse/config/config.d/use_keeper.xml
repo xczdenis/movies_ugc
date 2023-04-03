@@ -1,11 +1,11 @@
 <clickhouse>
     <zookeeper>
         <node>
-            <host>clickhouse-shard1-node1</host>
+            <host>clickhouse-shard1</host>
             <port from_env="CH_KEEPER_TCP_PORT"/>
         </node>
         <node>
-            <host>clickhouse-shard2-node1</host>
+            <host>clickhouse-shard2</host>
             <port from_env="CH_KEEPER_TCP_PORT"/>
         </node>
         <node>

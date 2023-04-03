@@ -1,34 +1,72 @@
 services:
-    clickhouse-shard1-node1:
+    # =======================================
+    # OLAP
+    # =======================================
+    clickhouse-shard1:
         volumes:
-            - clickhouse_shard1_node1_data:/var/lib/clickhouse
+            - clickhouse_shard1_data:/var/lib/clickhouse
         ports:
-            - "8123:${CH_HTTP_PORT}"
-            - "9000:${CH_TCP_PORT}"
+            - "${CH_NODE1_EXPOSE_HTTP_PORT}:${CH_HTTP_PORT}"
+            - "${CH_NODE1_EXPOSE_TCP_PORT}:${CH_NODE_PORT}"
 
-    clickhouse-shard1-node1-replica:
+    clickhouse-shard1-replica1:
         volumes:
-            - clickhouse_shard1_node1_replica_data:/var/lib/clickhouse
+            - clickhouse_shard1_replica1_data:/var/lib/clickhouse
         ports:
-            - "8124:${CH_HTTP_PORT}"
-            - "9001:${CH_TCP_PORT}"
+            - "${CH_NODE2_EXPOSE_HTTP_PORT}:${CH_HTTP_PORT}"
+            - "${CH_NODE2_EXPOSE_TCP_PORT}:${CH_NODE_PORT}"
 
-    clickhouse-shard2-node1:
+    clickhouse-shard2:
         volumes:
-            - clickhouse_shard2_node1_data:/var/lib/clickhouse
+            - clickhouse_shard2_data:/var/lib/clickhouse
         ports:
-            - "8125:${CH_HTTP_PORT}"
-            - "9002:${CH_TCP_PORT}"
+            - "${CH_NODE3_EXPOSE_HTTP_PORT}:${CH_HTTP_PORT}"
+            - "${CH_NODE3_EXPOSE_TCP_PORT}:${CH_NODE_PORT}"
 
-    clickhouse-shard2-node1-replica:
+    clickhouse-shard2-replica1:
         volumes:
-            - clickhouse_shard2_node1_replica_data:/var/lib/clickhouse
+            - clickhouse_shard2_replica1_data:/var/lib/clickhouse
         ports:
-            - "8126:${CH_HTTP_PORT}"
-            - "9003:${CH_TCP_PORT}"
+            - "${CH_NODE4_EXPOSE_HTTP_PORT}:${CH_HTTP_PORT}"
+            - "${CH_NODE4_EXPOSE_TCP_PORT}:${CH_NODE_PORT}"
+
+    clickhouse-initer:
+        volumes:
+            - ./src:/app/src
+            - ./init_db:/app/init_db
+
+    # =======================================
+    # app
+    # =======================================
+    app:
+        ports:
+            - "8000:8000"
+
+    # =======================================
+    # OLTP
+    # =======================================
+    kafka-broker:
+        volumes:
+            - kafka_broker_data:/bitnami/kafka
+        ports:
+            - "${KAFKA_BROKER_EXPOSE_PORT}:${KAFKA_BROKER_EXTERNAL_PORT}"
+
+    kafka-schema-registry:
+        ports:
+            - "${KAFKA_SCHEMA_REGISTRY_EXPOSE_PORT}:${KAFKA_SCHEMA_REGISTRY_PORT}"
+
+    kafka-ui:
+        ports:
+            - "${KAFKA_UI_EXPOSE_PORT}:8080"
+
+    kafka-initer:
+        volumes:
+            - ./src:/app/src
+            - ./init_db:/app/init_db
 
 volumes:
-    clickhouse_shard1_node1_data:
-    clickhouse_shard1_node1_replica_data:
-    clickhouse_shard2_node1_data:
-    clickhouse_shard2_node1_replica_data:
+    clickhouse_shard1_data:
+    clickhouse_shard1_replica1_data:
+    clickhouse_shard2_data:
+    clickhouse_shard2_replica1_data:
+    kafka_broker_data:

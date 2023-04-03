@@ -1,8 +1,0 @@
-{
-    "cluster": {
-        "nodes": [
-            { "host": "clickhouse-node1", "is_replica": false },
-            { "host": "clickhouse-node2", "is_replica": false }
-        ]
-    }
-}
