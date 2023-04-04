@@ -12,7 +12,7 @@ class UUIDMixin(BaseModel):
 
 class StrUUIDMixin(UUIDMixin):
     @validator("id")
-    def validate_uuids(cls, value):
+    def validate_uuids(cls, value):  # noqa
         if value:
             return str(value)
         return value

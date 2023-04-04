@@ -4,8 +4,8 @@ from jsonschema import validate
 from orjson import orjson
 from schema_registry.client.utils import SchemaVersion
 
-from adapters.db_clients.kafka import KafkaSchemaRegistryClient
-from adapters.mapings import topic_schema_mapping
+from adapters.db_clients.kafka.schema_registry import KafkaSchemaRegistryClient
+from adapters.mapings.topic_schemas import topic_schema_mapping
 from internal.exceptions import ValidationDataError
 from internal.interfaces.data_gateways.movie_viewing import MovieViewingGateway
 from internal.interfaces.db import EventProducerClient
