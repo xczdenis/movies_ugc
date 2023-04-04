@@ -1,3 +1,0 @@
-from adapters.db_clients.kafka.event_producer import KafkaEventProducerClient
-from adapters.db_clients.kafka.metadata_client import KafkaMetadataClient
-from adapters.db_clients.kafka.schema_registry import KafkaSchemaRegistryClient

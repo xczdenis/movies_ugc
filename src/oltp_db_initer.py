@@ -1,7 +1,8 @@
 import asyncio
 import os
 
-from adapters.db_clients.kafka import KafkaMetadataClient, KafkaSchemaRegistryClient
+from adapters.db_clients.kafka.metadata_client import KafkaMetadataClient
+from adapters.db_clients.kafka.schema_registry import KafkaSchemaRegistryClient
 from adapters.migrations.executors.kafka import KafkaSchemaCreator, KafkaTopicCreator
 from adapters.migrations.file import FileMigrationsLoader
 from config.settings import kafka_settings

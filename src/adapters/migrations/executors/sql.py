@@ -21,9 +21,6 @@ class SQLMigrationExecutor(MigrationExecutor):
         migration_name = migration.name
         try:
             self.db_client.execute(query)
-            # print(migration.name)
-            # print(query)
-            # print('---')
             logger.info("Migration completed successfully: %s" % migration_name)
         except Exception as e:
             logger.error("An error occurred while applying the migration '%s': %s" % (migration_name, e))

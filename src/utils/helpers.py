@@ -1,4 +1,4 @@
-from typing import Any, Awaitable
+from typing import Any
 
 from fastapi import FastAPI
 

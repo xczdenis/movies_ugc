@@ -1,9 +1,9 @@
 from http import HTTPStatus
 
-from fastapi import Request, FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from internal.exceptions import ValidationDataError, InternalNetworkConnectionError
+from internal.exceptions import InternalNetworkConnectionError, ValidationDataError
 from internal.responses import ErrorResponseContent
 from utils.helpers import get_all_sub_apps
 

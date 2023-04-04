@@ -6,7 +6,8 @@ from kafka.admin import NewTopic
 from loguru import logger
 from pydantic import BaseModel
 
-from adapters.db_clients.kafka import KafkaMetadataClient, KafkaSchemaRegistryClient
+from adapters.db_clients.kafka.metadata_client import KafkaMetadataClient
+from adapters.db_clients.kafka.schema_registry import KafkaSchemaRegistryClient
 from internal.interfaces.migrations import Migration, MigrationExecutor
 from utils.text import replace_env_variables
 

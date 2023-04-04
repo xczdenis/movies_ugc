@@ -19,7 +19,7 @@ class AppSettings(BaseSettings):
     API_V2_PREFIX: str = "v2"
 
     @validator("DEBUG")
-    def set_debug(cls, v, values):
+    def set_debug(cls, v, values):  # noqa
         return v and values["ENVIRONMENT"] == "development"
 
     class Config:

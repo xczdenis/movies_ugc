@@ -5,8 +5,8 @@ from loguru import logger
 
 from internal.interfaces.migrations import (
     Migration,
-    MigrationsLoader,
     MigrationExecutor,
+    MigrationsLoader,
 )
 
 
