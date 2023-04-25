@@ -1,4 +1,4 @@
-from internal.interfaces.db import DatabaseClient
+from internal.db import DatabaseClient
 
 
 class DatabaseClientContextManager:

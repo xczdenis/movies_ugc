@@ -41,6 +41,8 @@ x-kafka-default-broker: &kafka-default-broker
     build:
         context: .
         dockerfile: ./docker/kafka/broker/Dockerfile
+        args:
+            - IMG=${KAFKA_BROKER_IMG}
     env_file: .env
     environment:
       &kafka-default-broker-env
@@ -59,6 +61,30 @@ x-kafka-default-broker: &kafka-default-broker
 
 services:
     # =======================================
+    # app
+    # =======================================
+    app:
+        <<: *base-service
+        env_file: .env
+        build:
+            context: .
+            dockerfile: ./docker/app/Dockerfile
+            args:
+                env: ${ENVIRONMENT}
+        environment:
+            APP_HOST: 0.0.0.0
+            APP_PORT: 8000
+            KAFKA_CONNECTION_HOST: kafka-broker
+            KAFKA_CONNECTION_PORT: ${KAFKA_BROKER_CLIENT_PORT}
+            KAFKA_SCHEMA_REGISTRY_CONNECTION_HOST: kafka-schema-registry
+            KAFKA_SCHEMA_REGISTRY_CONNECTION_PORT: ${KAFKA_SCHEMA_REGISTRY_PORT}
+        depends_on:
+            kafka-broker:
+                condition: service_healthy
+            kafka-schema-registry:
+                condition: service_healthy
+
+    # =======================================
     # OLAP
     # =======================================
     clickhouse-default-node:
@@ -68,7 +94,7 @@ services:
             context: .
             dockerfile: ./docker/clickhouse/node.Dockerfile
             args:
-                - CH_SERVER_IMG=${CH_SERVER_IMG}
+                - IMG=${CH_SERVER_IMG}
         image: clickhouse-default-node
         volumes:
             - clickhouse_default_node_data:/var/lib/clickhouse
@@ -80,7 +106,7 @@ services:
             context: .
             dockerfile: ./docker/clickhouse/node-keeper.Dockerfile
             args:
-                - CH_SERVER_IMG=${CH_SERVER_IMG}
+                - IMG=${CH_SERVER_IMG}
         image: clickhouse-default-node-with-keeper
         volumes:
             - clickhouse_default_node_with_keeper_data:/var/lib/clickhouse
@@ -183,31 +209,6 @@ services:
                 condition: service_healthy
 
     # =======================================
-    # app
-    # =======================================
-    app:
-        <<: *base-service
-        <<: *profiles-oltp
-        env_file: .env
-        build:
-            context: .
-            dockerfile: ./docker/app/Dockerfile
-            args:
-                env: ${ENVIRONMENT}
-        environment:
-            APP_HOST: 0.0.0.0
-            APP_PORT: 8000
-            KAFKA_CONNECTION_HOST: kafka-broker
-            KAFKA_CONNECTION_PORT: ${KAFKA_BROKER_CLIENT_PORT}
-            KAFKA_SCHEMA_REGISTRY_CONNECTION_HOST: kafka-schema-registry
-            KAFKA_SCHEMA_REGISTRY_CONNECTION_PORT: ${KAFKA_SCHEMA_REGISTRY_PORT}
-        depends_on:
-            kafka-broker:
-                condition: service_healthy
-            kafka-schema-registry:
-                condition: service_healthy
-
-    # =======================================
     # OLTP
     # =======================================
     kafka-broker:
@@ -216,6 +217,7 @@ services:
             <<: *kafka-default-broker-env
             KAFKA_BROKER_HOST: kafka-broker
             KAFKA_CFG_BROKER_ID: 1
+            KAFKA_CFG_NODE_ID: 1
             KAFKA_CFG_ADVERTISED_LISTENERS: CLIENT://kafka-broker:${KAFKA_BROKER_CLIENT_PORT},EXTERNAL://localhost:${KAFKA_BROKER_EXTERNAL_PORT}
             KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka-broker:${KAFKA_BROKER_CONTROLLER_PORT}
         healthcheck:
@@ -228,6 +230,8 @@ services:
         build:
             context: .
             dockerfile: ./docker/kafka/schema_registry/Dockerfile
+            args:
+                - IMG=${KAFKA_SCHEMA_REGISTRY_IMG}
         environment:
             SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:${KAFKA_SCHEMA_REGISTRY_PORT}
             SCHEMA_REGISTRY_KAFKA_BROKERS: PLAINTEXT://kafka-broker:${KAFKA_BROKER_CLIENT_PORT}
@@ -241,7 +245,7 @@ services:
     kafka-ui:
         <<: *base-service
         <<: *profiles-oltp
-        image: provectuslabs/kafka-ui:v0.6.0
+        image: ${KAFKA_UI_IMG}
         environment:
             KAFKA_CLUSTERS_0_NAME: kraft
             KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker:${KAFKA_BROKER_CLIENT_PORT}

@@ -3,7 +3,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
-from internal.interfaces.migrations import Migration, MigrationsLoader
+from internal.migrations import Migration, MigrationsLoader
 
 
 @dataclass

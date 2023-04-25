@@ -6,7 +6,7 @@ from kafka.admin import KafkaAdminClient
 from loguru import logger
 
 from config.settings import app_settings
-from internal.interfaces.db import DatabaseClient
+from internal.db import DatabaseClient
 
 
 @dataclass(slots=True)

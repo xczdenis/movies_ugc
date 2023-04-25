@@ -10,8 +10,8 @@ from loguru import logger
 
 from adapters.db_clients.clickhouse import ClickhouseDBClient
 from config.settings import ROOT_DIR, ch_settings
-from internal.interfaces.context_managers import DatabaseClientContextManager
-from internal.interfaces.db import SQLDatabaseClient
+from internal.context_managers import DatabaseClientContextManager
+from internal.db import SQLDatabaseClient
 
 clickhouse_client: SQLDatabaseClient = ClickhouseDBClient.from_url(
     "clickhouse://{host}:{port}".format(

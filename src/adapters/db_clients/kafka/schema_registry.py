@@ -8,8 +8,8 @@ from schema_registry.client import SchemaRegistryClient
 from schema_registry.client.schema import SchemaFactory
 from schema_registry.client.utils import JSON_SCHEMA_TYPE, SchemaVersion
 
+from internal.db import DatabaseClient
 from internal.exceptions import InternalNetworkConnectionError
-from internal.interfaces.db import DatabaseClient
 from utils.helpers import execute_object_function
 
 

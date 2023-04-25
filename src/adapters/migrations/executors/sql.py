@@ -2,8 +2,8 @@ from dataclasses import dataclass, field
 
 from loguru import logger
 
-from internal.interfaces.db import SQLDatabaseClient
-from internal.interfaces.migrations import Migration, MigrationExecutor
+from internal.db import SQLDatabaseClient
+from internal.migrations import Migration, MigrationExecutor
 from utils.text import replace_env_variables
 
 
