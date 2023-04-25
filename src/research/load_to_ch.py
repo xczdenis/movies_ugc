@@ -38,8 +38,8 @@ def profile(func):
 def int_to_uuid(integer):
     _int = int(integer)
     byte_str = _int.to_bytes((_int.bit_length() + 7) // 8, "big")
-    sha1 = hashlib.sha1(byte_str).digest()
-    return f"'{str(uuid.UUID(bytes=sha1[:16], version=5))}'"
+    sha256 = hashlib.sha256(byte_str).digest()
+    return f"'{str(uuid.UUID(bytes=sha256[:16], version=5))}'"
 
 
 def insert(db, table, values):
