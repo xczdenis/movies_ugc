@@ -175,7 +175,7 @@ down-test:
 .PHONEY: run
 run: down
 	$(call log, Run containers (${CURRENT_ENVIRONMENT_PREFIX}))
-	$(call run_docker_compose_for_current_env, ${COMPOSE_OPTION_START_AS_DEMON} ${s})
+	$(call run_docker_compose_for_current_env, --profile default ${COMPOSE_OPTION_START_AS_DEMON} ${s})
 
 
 # build and run docker containers in demon mode for oltp profile

@@ -1,4 +1,4 @@
-from internal.interfaces.data_gateways.movie_viewing import MovieViewingGateway
+from internal.data_gateways.movie_viewing import MovieViewingGateway
 
 movie_viewing_gateway: MovieViewingGateway | None = None
 

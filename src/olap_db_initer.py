@@ -2,8 +2,8 @@ from adapters.db_clients.clickhouse import ClickhouseDBClient
 from adapters.migrations.executors.sql import SQLMigrationExecutor
 from adapters.migrations.file import SemicolonSeparatedLoader
 from config.settings import ch_settings
-from internal.interfaces.context_managers import DatabaseClientContextManager
-from internal.interfaces.db import SQLDatabaseClient
+from internal.context_managers import DatabaseClientContextManager
+from internal.db import SQLDatabaseClient
 from internal.services.migration import MigrationService
 
 clickhouse_client: SQLDatabaseClient = ClickhouseDBClient.from_url(

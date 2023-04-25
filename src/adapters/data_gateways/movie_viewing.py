@@ -6,9 +6,9 @@ from schema_registry.client.utils import SchemaVersion
 
 from adapters.db_clients.kafka.schema_registry import KafkaSchemaRegistryClient
 from adapters.mapings.topic_schemas import topic_schema_mapping
+from internal.data_gateways.movie_viewing import MovieViewingGateway
+from internal.db import EventProducerClient
 from internal.exceptions import ValidationDataError
-from internal.interfaces.data_gateways.movie_viewing import MovieViewingGateway
-from internal.interfaces.db import EventProducerClient
 from models.movies import CurrentPlaybackPosition, MoviePlaybackEvent, MovieViewing
 
 

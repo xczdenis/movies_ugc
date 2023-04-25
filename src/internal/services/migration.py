@@ -3,11 +3,7 @@ from dataclasses import dataclass
 
 from loguru import logger
 
-from internal.interfaces.migrations import (
-    Migration,
-    MigrationExecutor,
-    MigrationsLoader,
-)
+from internal.migrations import Migration, MigrationExecutor, MigrationsLoader
 
 
 @dataclass

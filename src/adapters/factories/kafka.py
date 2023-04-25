@@ -3,8 +3,8 @@ from adapters.db_clients.kafka.event_producer import KafkaEventProducerClient
 from adapters.db_clients.kafka.schema_registry import KafkaSchemaRegistryClient
 from app.factories import DatabaseClientFactory, DataGatewayFactory
 from config.settings import kafka_settings
-from internal.interfaces.data_gateways.movie_viewing import MovieViewingGateway
-from internal.interfaces.db import EventProducerClient
+from internal.data_gateways.movie_viewing import MovieViewingGateway
+from internal.db import EventProducerClient
 
 
 class KafkaDatabaseClientFactory(DatabaseClientFactory):
@@ -34,3 +34,13 @@ class KafkaDataGatewayFactory(DataGatewayFactory):
                 port=kafka_settings.KAFKA_SCHEMA_REGISTRY_CONNECTION_PORT,
             )
         )
+
+
+class KafkaETLFactory(DatabaseClientFactory):
+    def make_event_producer(self, **kwargs) -> KafkaEventProducerClient:
+        event_producer_client = KafkaEventProducerClient.from_url(
+            "kafka://{host}:{port}".format(
+                host=kafka_settings.KAFKA_CONNECTION_HOST, port=kafka_settings.KAFKA_CONNECTION_PORT
+            )
+        )
+        return event_producer_client

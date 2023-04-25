@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Generator
 from urllib.parse import parse_qs, urlparse
 
 
@@ -30,7 +31,7 @@ class DatabaseClient(ABC):
         ...
 
     @classmethod
-    def from_url(cls, url: str):
+    def from_url(cls, url: str, **kwargs):
         """
         Return a client configured from the given URL.
 
@@ -44,11 +45,11 @@ class DatabaseClient(ABC):
 
         init_args = {}
 
-        cls.__add_url_attr_to_init_args(parsed_url, "hostname", "host", init_args)
-        cls.__add_url_attr_to_init_args(parsed_url, "port", "port", init_args)
-        cls.__add_url_attr_to_init_args(parsed_url, "username", "user", init_args)
-        cls.__add_url_attr_to_init_args(parsed_url, "password", "password", init_args)
-        cls.__add_url_attr_to_init_args(parsed_url, "scheme", "scheme", init_args)
+        cls.__add_url_attr_to_kwargs(parsed_url, "hostname", "host", init_args)
+        cls.__add_url_attr_to_kwargs(parsed_url, "port", "port", init_args)
+        cls.__add_url_attr_to_kwargs(parsed_url, "username", "user", init_args)
+        cls.__add_url_attr_to_kwargs(parsed_url, "password", "password", init_args)
+        cls.__add_url_attr_to_kwargs(parsed_url, "scheme", "scheme", init_args)
 
         path = parsed_url.path.replace("/", "", 1)
         if path and hasattr(cls, "database"):
@@ -62,14 +63,21 @@ class DatabaseClient(ABC):
 
             init_args[name] = value
 
+        for k, v in kwargs.items():
+            cls.__add_attr_to_kwargs(k, v, init_args)
+
         return cls(**init_args)
 
     @classmethod
-    def __add_url_attr_to_init_args(cls, parsed_url, url_attr_name: str, cls_attr_name: str, kwargs: dict):
+    def __add_url_attr_to_kwargs(cls, parsed_url, url_attr_name: str, cls_attr_name: str, kwargs: dict):
         if hasattr(cls, cls_attr_name):
             value = getattr(parsed_url, url_attr_name)
-            if value is not None:
-                kwargs[cls_attr_name] = value
+            cls.__add_attr_to_kwargs(cls_attr_name, value, kwargs)
+
+    @classmethod
+    def __add_attr_to_kwargs(cls, attr: str, value, kwargs: dict):
+        if hasattr(cls, attr) and value is not None:
+            kwargs[attr] = value
 
 
 class SQLDatabaseClient(DatabaseClient, ABC):
@@ -81,4 +89,10 @@ class SQLDatabaseClient(DatabaseClient, ABC):
 class EventProducerClient(DatabaseClient, ABC):
     @abstractmethod
     async def send(self, data: dict, destination: str, **kwargs):
+        ...
+
+
+class EventConsumerClient(DatabaseClient, ABC):
+    @abstractmethod
+    async def read(self, **kwargs) -> Generator:
         ...

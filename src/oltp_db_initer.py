@@ -6,7 +6,7 @@ from adapters.db_clients.kafka.schema_registry import KafkaSchemaRegistryClient
 from adapters.migrations.executors.kafka import KafkaSchemaCreator, KafkaTopicCreator
 from adapters.migrations.file import FileMigrationsLoader
 from config.settings import kafka_settings
-from internal.interfaces.context_managers import AsyncDatabaseClientContextManager
+from internal.context_managers import AsyncDatabaseClientContextManager
 from internal.services.migration import MigrationService
 
 

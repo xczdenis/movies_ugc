@@ -5,8 +5,8 @@ from fastapi import APIRouter, FastAPI
 from fastapi.responses import ORJSONResponse
 
 from config.settings import app_settings
-from internal.interfaces.data_gateways.movie_viewing import MovieViewingGateway
-from internal.interfaces.db import EventProducerClient
+from internal.data_gateways.movie_viewing import MovieViewingGateway
+from internal.db import EventProducerClient
 from utils.helpers import case_free_pop
 
 
@@ -35,6 +35,13 @@ class DatabaseClientFactory(ABC):
 
 
 class DataGatewayFactory(ABC):
+    def make_movie_viewing_gateway(
+        self, event_producer: EventProducerClient, **kwargs
+    ) -> MovieViewingGateway:
+        ...
+
+
+class ETLFactory(ABC):
     def make_movie_viewing_gateway(
         self, event_producer: EventProducerClient, **kwargs
     ) -> MovieViewingGateway:

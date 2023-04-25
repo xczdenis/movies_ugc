@@ -9,7 +9,7 @@ from loguru import logger
 from orjson import orjson
 
 from config.settings import app_settings
-from internal.interfaces.db import EventProducerClient
+from internal.db import EventProducerClient
 
 
 @dataclass(slots=True)

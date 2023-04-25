@@ -3,7 +3,7 @@ from functools import lru_cache
 from fastapi import Depends
 
 from dependencies.data_gateaways import get_movie_viewing_gateway
-from internal.interfaces.data_gateways.movie_viewing import MovieViewingGateway
+from internal.data_gateways.movie_viewing import MovieViewingGateway
 from internal.services.movie_viewing import MovieViewingService
 
 
