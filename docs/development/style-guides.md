@@ -19,8 +19,9 @@
 Необходимо выполнить импорт моделей из файла `models.py` в файл `routes.py`.
 
 Неправильно:
+
 ```python
-from src.app.models import User
+from src.movies_ugc.app import User
 ```
 Правильно:
 ```python

@@ -1,4 +1,4 @@
 #!/bin/sh
 . ./.venv/bin/activate
 
-python src/olap_db_initer.py
+python src/${PROJECT_PKG_NAME}/olap_db_initer.py

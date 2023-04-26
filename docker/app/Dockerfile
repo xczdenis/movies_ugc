@@ -3,7 +3,7 @@ ARG env=production
 FROM python:3.11-slim as base
 
 ENV CONTAINER_HOME_DIR=app \
-    PROJECT_PACKAGE=src \
+    HOST_SRC_DIR=src \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     POETRY_VERSION=1.4.0
@@ -41,7 +41,7 @@ FROM final as development
 
 FROM final as production
 
-COPY ./$PROJECT_PACKAGE ./$PROJECT_PACKAGE
+COPY ./$HOST_SRC_DIR ./$HOST_SRC_DIR
 
 
 FROM ${env}
