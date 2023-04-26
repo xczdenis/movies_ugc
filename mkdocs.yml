@@ -1,0 +1,74 @@
+site_name: UGC-movies
+site_url: https://github.com/xczdenis/movies_ugc
+nav:
+    -   Home: index.md
+    -   Запуск проекта:
+            - launching/envs.md
+            - launching/docker.md
+            - launching/launch.md
+            - launching/local.md
+    -   Запуск тестов: launching/tests.md
+    -   OAuth2:
+            - oauth2/intro.md
+            - oauth2/clients.md
+            - oauth2/developers.md
+    -   Режим разработки:
+            - development-env/init.md
+            - development-env/pre-commit-hooks.md
+    -   Особенности разработки:
+            - development/intro.md
+            - development/migrations.md
+            - development/requirements.md
+            - development/style-guides.md
+            - development/conventional-commits.md
+            - development/ide.md
+            - development/lint.md
+    -   Flow работы с репозиторием: git/git-flow.md
+theme:
+    name: material
+    features:
+        - header.autohide
+        - search.suggest
+        - search.highlight
+        - content.tabs.link
+    palette:
+        -   media: '(prefers-color-scheme: dark)'
+            scheme: slate
+            primary: teal
+            accent: amber
+            toggle:
+                icon: material/weather-night
+                name: Switch to light mode
+        -   media: '(prefers-color-scheme: light)'
+            scheme: default
+            toggle:
+                icon: material/weather-sunny
+                name: Switch to dark mode
+plugins:
+    - glightbox
+repo_name: xczdenis/movies_ugc
+repo_url: https://github.com/xczdenis/movies_ugc
+markdown_extensions:
+    - tables
+    - admonition
+    - pymdownx.details
+    -   pymdownx.emoji:
+            emoji_index: !!python/name:materialx.emoji.twemoji
+            emoji_generator: !!python/name:materialx.emoji.to_svg
+    -   pymdownx.highlight:
+            anchor_linenums: false
+            auto_title: false
+            linenums: false
+    -   pymdownx.tabbed:
+            alternate_style: true
+    -   pymdownx.superfences:
+            custom_fences:
+                -   name: mermaid
+                    class: mermaid
+                    format: !!python/name:pymdownx.superfences.fence_code_format
+extra_css:
+    - css/termynal.css
+    - css/custom.css
+extra_javascript:
+    - js/termynal.js
+    - js/custom.js

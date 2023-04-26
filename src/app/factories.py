@@ -39,10 +39,3 @@ class DataGatewayFactory(ABC):
         self, event_producer: EventProducerClient, **kwargs
     ) -> MovieViewingGateway:
         ...
-
-
-class ETLFactory(ABC):
-    def make_movie_viewing_gateway(
-        self, event_producer: EventProducerClient, **kwargs
-    ) -> MovieViewingGateway:
-        ...

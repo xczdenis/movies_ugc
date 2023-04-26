@@ -34,13 +34,3 @@ class KafkaDataGatewayFactory(DataGatewayFactory):
                 port=kafka_settings.KAFKA_SCHEMA_REGISTRY_CONNECTION_PORT,
             )
         )
-
-
-class KafkaETLFactory(DatabaseClientFactory):
-    def make_event_producer(self, **kwargs) -> KafkaEventProducerClient:
-        event_producer_client = KafkaEventProducerClient.from_url(
-            "kafka://{host}:{port}".format(
-                host=kafka_settings.KAFKA_CONNECTION_HOST, port=kafka_settings.KAFKA_CONNECTION_PORT
-            )
-        )
-        return event_producer_client
