@@ -1,4 +1,4 @@
 #!/bin/sh
 . ./.venv/bin/activate
 
-python src/main.py
+python src/${PROJECT_PKG_NAME}/main.py
