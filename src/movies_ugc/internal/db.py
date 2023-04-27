@@ -37,9 +37,9 @@ class DatabaseClient(ABC):
 
         For example::
 
-            clickhouse://[user:password]@localhost:9000/default
-            postgres://[user:password]@localhost:9440/default
-            kafka://[user:password]@localhost:9440/default
+            clickhouse://user:password@localhost:9000/default
+            postgres://user:password@localhost:9440/default
+            kafka://user:password@localhost:9440/default
         """
         parsed_url = urlparse(url)
 
