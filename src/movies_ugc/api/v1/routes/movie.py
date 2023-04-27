@@ -6,11 +6,11 @@ from internal.services.movie_viewing import MovieViewingService
 from models.movies import Movie, MoviePlaybackEvent, MovieViewing
 from models.users import User
 
-router = APIRouter(
-    prefix="/movie",
-)
-
 NAMESPACE = "movie"
+
+router = APIRouter(
+    prefix=f"/{NAMESPACE}",
+)
 
 
 @router.post(
@@ -25,7 +25,6 @@ async def add_playback_event(
     """
     Add data about an event that occurred while playing a movie
     """
-
     playback_event = MoviePlaybackEvent(
         user=User(id=request_event.user_id),
         movie=Movie(id=request_event.movie_id),
@@ -48,9 +47,8 @@ async def add_movie_viewing(
     service: MovieViewingService = Depends(get_movie_viewing_service),
 ) -> MovieViewing:
     """
-    Add movie viewing time
+    Add data about the time of viewing the movie.
     """
-
     movie_viewing = MovieViewing(
         user=User(id=request_movie_viewing.user_id),
         movie=Movie(id=request_movie_viewing.movie_id),
