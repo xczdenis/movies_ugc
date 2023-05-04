@@ -1,7 +1,9 @@
 *.sqlite
 site
 fake_data/**/*.csv
-
+.env.local
+.DS_Store
+DS_Store
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,jetbrains+all,python,django,virtualenv,venv,dotenv,direnv
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,jetbrains+all,python,django,virtualenv,venv,dotenv,direnv
 
