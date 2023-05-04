@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from config.settings import kafka_settings
 from internal.data_gateways.movie_viewing import MovieViewingGateway
 from internal.exceptions import ValidationDataError
-from models.movies import MoviePlaybackEvent, MovieViewing
+from models.data_structures.movies import MoviePlaybackEvent, MovieViewing
 from utils.helpers import execute_async_object_function
 
 

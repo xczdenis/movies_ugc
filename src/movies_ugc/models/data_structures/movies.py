@@ -1,11 +1,7 @@
 from enum import Enum
 
-from models.mixins import OrjsonConfigMixin, StrUUIDMixin
-from models.users import User
-
-
-class Movie(StrUUIDMixin, OrjsonConfigMixin):
-    pass
+from models.data_structures.mixins import OrjsonConfigMixin, UUIDMixin
+from models.data_structures.users import User
 
 
 class MoviePlaybackEventType(str, Enum):
@@ -14,6 +10,10 @@ class MoviePlaybackEventType(str, Enum):
     stop = "stop"
     fast_forward = "fast_forward"
     rewind = "rewind"
+
+
+class Movie(UUIDMixin, OrjsonConfigMixin):
+    pass
 
 
 class MoviePlaybackEvent(OrjsonConfigMixin):
@@ -33,3 +33,8 @@ class MovieViewing(OrjsonConfigMixin):
     user: User
     movie: Movie
     viewed_seconds: int
+
+
+class FavoriteMovie(OrjsonConfigMixin):
+    user: User
+    movie: Movie

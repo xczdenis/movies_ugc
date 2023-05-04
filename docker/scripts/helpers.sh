@@ -11,6 +11,6 @@ check_service() (
 
   log_info "Waiting the service: ${color_white}${service_name} (url=${host}:${port})"
   /scripts/wait-for-it.sh "${host}":"${port}" -t 120 --
-  log_success "${color_white}${service_name} is up!${color_reset}"
+  log_success "${service_name} is up!${color_reset}"
   echo ""
 )

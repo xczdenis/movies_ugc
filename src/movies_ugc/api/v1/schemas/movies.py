@@ -1,12 +1,11 @@
-from uuid import UUID
-
-from models.movies import MoviePlaybackEventType
+from config.types import TMovieId, TUserId
+from models.data_structures.movies import MoviePlaybackEventType
 from pydantic import BaseModel
 
 
 class UserMovieMixin(BaseModel):
-    user_id: UUID
-    movie_id: UUID
+    user_id: TUserId
+    movie_id: TMovieId
 
 
 class MoviePlaybackEventRequest(UserMovieMixin):
@@ -20,3 +19,11 @@ class CurrentPlaybackPositionRequest(UserMovieMixin):
 
 class MovieViewingRequest(UserMovieMixin):
     viewed_seconds: int
+
+
+class FavoriteBaseResponse(UserMovieMixin):
+    pass
+
+
+class FavoriteMarkedResponse(UserMovieMixin):
+    is_favorite: bool

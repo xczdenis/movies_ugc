@@ -1,15 +1,30 @@
 from adapters.factories.kafka import KafkaDatabaseClientFactory, KafkaDataGatewayFactory
+from adapters.factories.mongo import MongoDatabaseClientFactory, MongoDataGatewayFactory
 from api.v1 import router_v1
 from app.factories import AppFactory
-from config.settings import app_settings
+from config.settings import app_settings, mongo_settings
 from fastapi import FastAPI
+from fastapi_pagination import add_pagination
 from internal.responses import ErrorResponseContent
+from models.mongo.movies import Favorite, Like
 
-db_factory = KafkaDatabaseClientFactory()
-data_gateway_factory = KafkaDataGatewayFactory()
+kafka_db_factory = KafkaDatabaseClientFactory()
+kafka_data_gateway_factory = KafkaDataGatewayFactory()
 
-event_producer = db_factory.make_event_producer()
-movie_viewing_gateway = data_gateway_factory.make_movie_viewing_gateway(event_producer=event_producer)
+mongo_db_factory = MongoDatabaseClientFactory(
+    mongo_router_host=mongo_settings.MONGO_ROUTER_HOST, mongo_router_port=mongo_settings.MONGO_ROUTER_PORT
+)
+mongo_data_gateway_factory = MongoDataGatewayFactory()
+
+event_producer = kafka_db_factory.make_event_producer()
+movie_viewing_gateway = kafka_data_gateway_factory.make_movie_viewing_gateway(event_producer=event_producer)
+
+main_db_client = mongo_db_factory.make_async_db_client()
+movie_interactions_gateway = mongo_data_gateway_factory.make_movie_interactions_gateway(
+    db_client=main_db_client,
+    database=mongo_settings.MONGO_DB_MOVIES,
+    models=[Like, Favorite],
+)
 
 global_responses = {
     500: {"model": ErrorResponseContent, "description": "Internal server error"},
@@ -29,6 +44,7 @@ def create_app(config: dict) -> FastAPI:
     main_app = app_factory.make_app(**config, **global_app_attributes)
 
     app_v1 = app_factory.make_app(router=router_v1, **config, **global_app_attributes)
+    add_pagination(app_v1)
 
     mount_sub_app(main_app, app_settings.API_V1_PREFIX, app_v1)
 

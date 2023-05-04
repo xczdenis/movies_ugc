@@ -1,10 +1,10 @@
+from api.dependencies.interactors import get_movie_viewing_service
 from api.utils import make_rout_name
 from api.v1.schemas.movies import MoviePlaybackEventRequest, MovieViewingRequest
-from dependencies.interactors import get_movie_viewing_service
 from fastapi import APIRouter, Depends
 from internal.services.movie_viewing import MovieViewingService
-from models.movies import Movie, MoviePlaybackEvent, MovieViewing
-from models.users import User
+from models.data_structures.movies import Movie, MoviePlaybackEvent, MovieViewing
+from models.data_structures.users import User
 
 NAMESPACE = "movie"
 

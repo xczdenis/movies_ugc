@@ -8,6 +8,7 @@ services:
         ports:
             - "8000:8000"
 
+
     # =======================================
     # OLAP
     # =======================================
@@ -44,6 +45,7 @@ services:
             - ./src:/app/src
             - ./init_db:/app/init_db
 
+
     # =======================================
     # OLTP
     # =======================================
@@ -66,9 +68,94 @@ services:
             - ./src:/app/src
             - ./init_db:/app/init_db
 
+
+    # =======================================
+    # Mongo
+    # =======================================
+
+    # ---------------------------------------
+    # Mongo: Initer
+    mongo-initer:
+        volumes:
+            - ./docker/mongo/scripts:/scripts/init
+            - ./src:/app/src
+            - ./init_db:/app/init_db
+
+    # ---------------------------------------
+    # Mongo: Router
+    mongo-router01:
+        volumes:
+            - ./docker/mongo/scripts:/scripts/init
+            - mongo-router01-data:/data
+        ports:
+            - 27017:27017
+
+    # ---------------------------------------
+    # Mongo: Config Servers
+    mongo-configsvr01:
+        volumes:
+            - ./docker/mongo/scripts:/scripts/init
+            - mongo-configsvr01-data:/data
+        ports:
+            - 27018:27017
+
+    # ---------------------------------------
+    # Mongo: Shards
+
+    ## --------------------------------------
+    ## Mongo shards: Shard #01
+    mongo-shard01-a:
+        volumes:
+            - ./docker/mongo/scripts:/scripts/init
+            - mongo-shard01-a-data:/data
+        ports:
+            - 27019:27017
+    mongo-shard01-b:
+        volumes:
+            - ./docker/mongo/scripts:/scripts/init
+            - mongo-shard01-b-data:/data
+        ports:
+            - 27020:27017
+    mongo-shard01-c:
+        volumes:
+            - ./docker/mongo/scripts:/scripts/init
+            - mongo-shard01-c-data:/data
+        ports:
+            - 27021:27017
+
+    ## --------------------------------------
+    ## Mongo shards: Shard #02
+    mongo-shard02-a:
+        volumes:
+            - ./docker/mongo/scripts:/scripts/init
+            - mongo-shard02-a-data:/data
+        ports:
+            - 27022:27017
+    mongo-shard02-b:
+        volumes:
+            - ./docker/mongo/scripts:/scripts/init
+            - mongo-shard02-b-data:/data
+        ports:
+            - 27023:27017
+    mongo-shard02-c:
+        volumes:
+            - ./docker/mongo/scripts:/scripts/init
+            - mongo-shard02-c-data:/data
+        ports:
+            - 27124:27017
+
+
 volumes:
     clickhouse_shard1_data:
     clickhouse_shard1_replica1_data:
     clickhouse_shard2_data:
     clickhouse_shard2_replica1_data:
     kafka_broker_data:
+    mongo-router01-data:
+    mongo-configsvr01-data:
+    mongo-shard01-a-data:
+    mongo-shard01-b-data:
+    mongo-shard01-c-data:
+    mongo-shard02-a-data:
+    mongo-shard02-b-data:
+    mongo-shard02-c-data:
