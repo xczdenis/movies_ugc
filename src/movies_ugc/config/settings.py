@@ -8,7 +8,13 @@ SRC_DIR = BASE_DIR.parent
 ROOT_DIR = SRC_DIR.parent
 
 
-class AppSettings(BaseSettings):
+class BaseSettingsConfigMixin(BaseSettings):
+    class Config:
+        env_file = os.path.join(ROOT_DIR, ".env"), os.path.join(ROOT_DIR, ".env.local")
+        env_file_encoding = "utf-8"
+
+
+class AppSettings(BaseSettingsConfigMixin):
     APP_HOST: str
     APP_PORT: int
     ENVIRONMENT: str = "production"
@@ -23,12 +29,8 @@ class AppSettings(BaseSettings):
     def set_debug(cls, v, values):  # noqa
         return v and values["ENVIRONMENT"] == "development"
 
-    class Config:
-        env_file = os.path.join(ROOT_DIR, ".env")
-        env_file_encoding = "utf-8"
 
-
-class CHSettings(BaseSettings):
+class CHSettings(BaseSettingsConfigMixin):
     CH_NODE_HOST: str = "localhost"
     CH_HTTP_PORT: int
     CH_NODE_PORT: int
@@ -36,12 +38,17 @@ class CHSettings(BaseSettings):
     CH_DB_MOVIES: str
     CH_MIGRATIONS_REPOSITORY_PATH: str = str(ROOT_DIR / "init_db" / "clickhouse")
 
-    class Config:
-        env_file = os.path.join(ROOT_DIR, ".env")
-        env_file_encoding = "utf-8"
+
+class MongoSettings(BaseSettingsConfigMixin):
+    MONGO_ROUTER_HOST: str
+    MONGO_ROUTER_PORT: int
+    MONGO_CONFIG_SERVER_HOST: str
+    MONGO_CONFIG_SERVER_PORT: int
+    MONGO_CLUSTER_CONFIG_PATH: str = str(ROOT_DIR / "init_db/mongo/cluster-config.json")
+    MONGO_DB_MOVIES: str
 
 
-class KafkaSettings(BaseSettings):
+class KafkaSettings(BaseSettingsConfigMixin):
     KAFKA_CONNECTION_HOST: str
     KAFKA_CONNECTION_PORT: int
     KAFKA_SCHEMA_REGISTRY_CONNECTION_HOST: str
@@ -54,11 +61,8 @@ class KafkaSettings(BaseSettings):
     KAFKA_SCHEMA_MOVIE_VIEWING: str
     KAFKA_MIGRATIONS_REPOSITORY_PATH: str = str(ROOT_DIR / "init_db" / "kafka")
 
-    class Config:
-        env_file = os.path.join(ROOT_DIR, ".env")
-        env_file_encoding = "utf-8"
-
 
 app_settings: AppSettings = AppSettings()
 ch_settings: CHSettings = CHSettings()
 kafka_settings: KafkaSettings = KafkaSettings()
+mongo_settings: MongoSettings = MongoSettings()

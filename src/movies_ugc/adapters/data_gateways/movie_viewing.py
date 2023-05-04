@@ -6,7 +6,7 @@ from internal.data_gateways.movie_viewing import MovieViewingGateway
 from internal.db import EventProducerClient
 from internal.exceptions import ValidationDataError
 from jsonschema import validate
-from models.movies import CurrentPlaybackPosition, MoviePlaybackEvent, MovieViewing
+from models.data_structures.movies import CurrentPlaybackPosition, MoviePlaybackEvent, MovieViewing
 from orjson import orjson
 from schema_registry.client.utils import SchemaVersion
 

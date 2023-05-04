@@ -1,0 +1,70 @@
+{
+    "configsvr": {
+        "_id": "rs-config-server",
+        "configsvr": true,
+        "version": 1,
+        "members": [
+            {
+                "_id": 0,
+                "host": "mongo-configsvr01:27017"
+            }
+        ]
+    },
+    "shards": [
+        {
+            "_id": "rs-shard-01",
+            "version": 1,
+            "members": [
+                {
+                    "_id": 0,
+                    "host": "mongo-shard01-a:27017"
+                },
+                {
+                    "_id": 1,
+                    "host": "mongo-shard01-b:27017"
+                },
+                {
+                    "_id": 2,
+                    "host": "mongo-shard01-c:27017"
+                }
+            ]
+        },
+        {
+            "_id": "rs-shard-02",
+            "version": 1,
+            "members": [
+                {
+                    "_id": 0,
+                    "host": "mongo-shard02-a:27017"
+                },
+                {
+                    "_id": 1,
+                    "host": "mongo-shard02-b:27017"
+                },
+                {
+                    "_id": 2,
+                    "host": "mongo-shard02-c:27017"
+                }
+            ]
+        }
+    ],
+    "databases": [
+        {
+            "name": "movies",
+            "collections": [
+                {
+                    "name": "likes",
+                    "key": {
+                        "user_id": 1
+                    }
+                },
+                {
+                    "name": "favorites",
+                    "key": {
+                        "movie_id": 1
+                    }
+                }
+            ]
+        }
+    ]
+}

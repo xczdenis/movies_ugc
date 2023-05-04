@@ -27,7 +27,7 @@ class DatabaseClient(ABC):
         ...
 
     @abstractmethod
-    async def is_healthy(self, **kwargs):
+    async def is_healthy(self, **kwargs) -> bool:
         ...
 
     @classmethod

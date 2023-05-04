@@ -1,0 +1,2 @@
+TUserId = str
+TMovieId = str

@@ -15,6 +15,8 @@ DOCKER_COMPOSE_TEST_DEV_FILE=docker-compose.test.dev.yml
 COMPOSE_OPTION_START_AS_DEMON=up -d --build
 COMPOSE_PROFILE_DEFAULT=""--profile default""
 
+ESSENTIAL_SERVICES=python-src clickhouse-default-node
+
 # define standard colors
 ifneq (,$(findstring xterm,${TERM}))
 	BLACK        := $(shell printf "\033[30m")
@@ -99,6 +101,7 @@ run_docker_compose_for_env:
 	@if [ $(strip ${env}) != "_" ]; then \
 		DOCKER_BUILDKIT=${DOCKER_BUILDKIT} \
 		COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}_$(strip ${env}) \
+		INSTALL_DEV=true \
 		docker-compose \
 			-f ${DOCKER_COMPOSE_MAIN_FILE} \
 			$(strip ${override_file}) \
@@ -106,6 +109,7 @@ run_docker_compose_for_env:
     else \
 		DOCKER_BUILDKIT=${DOCKER_BUILDKIT} \
 		COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME} \
+		INSTALL_DEV=true \
 		docker-compose \
 			-f ${DOCKER_COMPOSE_MAIN_FILE} \
 			$(strip ${override_file}) \
@@ -152,7 +156,6 @@ remove:
 	docker-compose down --rmi all --volumes --remove-orphans && docker system prune -a --volumes --force
 
 
-
 # stop and remove all running containers
 .PHONEY: down down-prod down-dev down-test
 down:
@@ -170,6 +173,12 @@ down-test:
 	$(call run_docker_compose_for_env, "${PREFIX_TEST}", "${DOCKER_COMPOSE_TEST_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
 	$(call run_docker_compose_for_env, "_", "${DOCKER_COMPOSE_TEST_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
 
+# build only required images
+.PHONEY: build-required
+prebuild:
+	$(call log, Build essential images)
+	$(call run_docker_compose_for_current_env, build ${ESSENTIAL_SERVICES})
+
 
 # build and run docker containers in demon mode
 .PHONEY: run
@@ -181,15 +190,29 @@ run: down
 # build and run docker containers in demon mode for oltp profile
 .PHONEY: run-oltp
 run-oltp: down
-	$(call log, Run containers (${CURRENT_ENVIRONMENT_PREFIX}))
+	$(call log, Run containers for oltp profile (${CURRENT_ENVIRONMENT_PREFIX}))
 	$(call run_docker_compose_for_current_env, --profile oltp ${COMPOSE_OPTION_START_AS_DEMON} ${s})
 
 
 # build and run docker containers in demon mode for olap profile
 .PHONEY: run-olap
 run-olap: down
-	$(call log, Run containers (${CURRENT_ENVIRONMENT_PREFIX}))
+	$(call log, Run containers for olap profile (${CURRENT_ENVIRONMENT_PREFIX}))
 	$(call run_docker_compose_for_current_env, --profile olap ${COMPOSE_OPTION_START_AS_DEMON} ${s})
+
+
+# build and run docker containers in demon mode for olap profile
+.PHONEY: run-nosql
+run-nosql: down
+	$(call log, Run containers for nosql profile (${CURRENT_ENVIRONMENT_PREFIX}))
+	$(call run_docker_compose_for_current_env, --profile nosql ${COMPOSE_OPTION_START_AS_DEMON} ${s})
+
+
+# build and run docker containers in demon mode for api profile
+.PHONEY: run-api
+run-api: down
+	$(call log, Run containers for api profile (${CURRENT_ENVIRONMENT_PREFIX}))
+	$(call run_docker_compose_for_current_env, --profile api ${COMPOSE_OPTION_START_AS_DEMON} ${s})
 
 
 # show container's logs

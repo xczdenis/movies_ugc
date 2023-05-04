@@ -8,6 +8,18 @@ x-profiles-oltp: &profiles-oltp
         - default
         - oltp
 
+x-profiles-nosql: &profiles-nosql
+    profiles:
+        - default
+        - nosql
+
+x-profiles-api: &profiles-api
+    profiles:
+        - default
+        - oltp
+        - nosql
+        - api
+
 x-base-service: &base-service
     platform: ${DOCKER_IMG_PLATFORM:-linux/amd64}
     profiles:
@@ -19,15 +31,15 @@ x-default-service: &default-service
     entrypoint: "bash -c"
     command: "exit 0"
 
+x-common-healthcheck: &common-healthcheck
+    interval: 5s
+    timeout: 5s
+    retries: 10
+
 x-clickhouse-default-node: &clickhouse-default-node
     <<: *base-service
     image: clickhouse-default-node
     env_file: .env
-    healthcheck:
-      &clickhouse-common-healthcheck
-        interval: 5s
-        timeout: 5s
-        retries: 10
 
 x-clickhouse-default-node-with-keeper: &clickhouse-default-node-with-keeper
     <<: *clickhouse-default-node
@@ -35,9 +47,7 @@ x-clickhouse-default-node-with-keeper: &clickhouse-default-node-with-keeper
 
 x-kafka-default-broker: &kafka-default-broker
     <<: *base-service
-    profiles:
-        - default
-        - oltp
+    <<: *profiles-api
     build:
         context: .
         dockerfile: ./docker/kafka/broker/Dockerfile
@@ -53,13 +63,33 @@ x-kafka-default-broker: &kafka-default-broker
         KAFKA_CFG_LISTENERS: CONTROLLER://:${KAFKA_BROKER_CONTROLLER_PORT},CLIENT://:${KAFKA_BROKER_CLIENT_PORT},EXTERNAL://:${KAFKA_BROKER_EXTERNAL_PORT}
         KAFKA_CFG_INTER_BROKER_LISTENER_NAME: CLIENT
         ALLOW_PLAINTEXT_LISTENER: yes
-    healthcheck:
-      &kafka-common-healthcheck
-        interval: 5s
-        timeout: 5s
-        retries: 10
+
+x-mongo-default-service: &mongo-default-service
+    <<: *base-service
+    <<: *profiles-api
+    env_file: .env
+    build:
+        context: .
+        dockerfile: ./docker/mongo/Dockerfile
+        args:
+            - ENV=${ENVIRONMENT}
+            - IMG=${MONGO_IMG}
+
 
 services:
+    # =======================================
+    # Default python service
+    # =======================================
+    python-src:
+        <<: *default-service
+        build:
+            context: .
+            dockerfile: ./docker/python/Dockerfile
+            args:
+                env: ${ENVIRONMENT}
+                img: ${PYTHON_IMG}
+        image: python-src
+
     # =======================================
     # app
     # =======================================
@@ -85,7 +115,7 @@ services:
                 condition: service_healthy
 
     # =======================================
-    # OLAP
+    # ClickHouse
     # =======================================
     clickhouse-default-node:
         <<: *default-service
@@ -121,7 +151,7 @@ services:
             CH_KEEPER_SERVER_ID: 1
         healthcheck:
             test: [ "CMD", "/scripts/wait-for-it.sh", "clickhouse-shard1:${CH_NODE_PORT}" ]
-            <<: *clickhouse-common-healthcheck
+            <<: *common-healthcheck
 
     clickhouse-shard1-replica1:
         <<: *clickhouse-default-node
@@ -132,7 +162,7 @@ services:
             CH_NODE_REPLICA_NAME: clickhouse-shard1-replica1
         healthcheck:
             test: [ "CMD", "/scripts/wait-for-it.sh", "clickhouse-shard1-replica1:${CH_NODE_PORT}" ]
-            <<: *clickhouse-common-healthcheck
+            <<: *common-healthcheck
         depends_on:
             clickhouse-keeper-quorum:
                 condition: service_healthy
@@ -149,7 +179,7 @@ services:
             CH_KEEPER_SERVER_ID: 2
         healthcheck:
             test: [ "CMD", "/scripts/wait-for-it.sh", "clickhouse-shard2:${CH_NODE_PORT}" ]
-            <<: *clickhouse-common-healthcheck
+            <<: *common-healthcheck
 
     clickhouse-shard2-replica1:
         <<: *clickhouse-default-node
@@ -160,7 +190,7 @@ services:
             CH_NODE_REPLICA_NAME: clickhouse-shard2-replica1
         healthcheck:
             test: [ "CMD", "/scripts/wait-for-it.sh", "clickhouse-shard2-replica1:${CH_NODE_PORT}" ]
-            <<: *clickhouse-common-healthcheck
+            <<: *common-healthcheck
         depends_on:
             clickhouse-keeper-quorum:
                 condition: service_healthy
@@ -179,7 +209,7 @@ services:
             - clickhouse_keeper_quorum_data:/var/lib/clickhouse
         healthcheck:
             test: [ "CMD", "/scripts/wait-for-it.sh", "clickhouse-keeper-quorum:${CH_NODE_PORT}" ]
-            <<: *clickhouse-common-healthcheck
+            <<: *common-healthcheck
         depends_on:
             - clickhouse-shard1
             - clickhouse-shard2
@@ -209,7 +239,7 @@ services:
                 condition: service_healthy
 
     # =======================================
-    # OLTP
+    # Kafka
     # =======================================
     kafka-broker:
         <<: *kafka-default-broker
@@ -222,11 +252,11 @@ services:
             KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka-broker:${KAFKA_BROKER_CONTROLLER_PORT}
         healthcheck:
             test: [ "CMD", "/scripts/wait-for-it.sh", "kafka-broker:${KAFKA_BROKER_CLIENT_PORT}" ]
-            <<: *kafka-common-healthcheck
+            <<: *common-healthcheck
 
     kafka-schema-registry:
         <<: *base-service
-        <<: *profiles-oltp
+        <<: *profiles-api
         build:
             context: .
             dockerfile: ./docker/kafka/schema_registry/Dockerfile
@@ -240,11 +270,11 @@ services:
                 condition: service_healthy
         healthcheck:
             test: [ "CMD", "/scripts/wait-for-it.sh", "kafka-schema-registry:${KAFKA_SCHEMA_REGISTRY_PORT}" ]
-            <<: *kafka-common-healthcheck
+            <<: *common-healthcheck
 
     kafka-ui:
         <<: *base-service
-        <<: *profiles-oltp
+        <<: *profiles-api
         image: ${KAFKA_UI_IMG}
         environment:
             KAFKA_CLUSTERS_0_NAME: kraft
@@ -256,7 +286,7 @@ services:
 
     kafka-initer:
         <<: *base-service
-        <<: *profiles-oltp
+        <<: *profiles-api
         env_file: .env
         build:
             context: .
@@ -273,6 +303,106 @@ services:
                 condition: service_healthy
             kafka-schema-registry:
                 condition: service_healthy
+
+
+    # =======================================
+    # Mongo
+    # =======================================
+
+    # ---------------------------------------
+    # Mongo: Initer
+    mongo-initer:
+        <<: *base-service
+        <<: *profiles-api
+        env_file: .env
+        build:
+            context: .
+            dockerfile: ./docker/mongo/initer/Dockerfile
+        depends_on:
+            mongo-configsvr01:
+                condition: service_healthy
+
+    # ---------------------------------------
+    # Mongo: Router
+    mongo-router01:
+        <<: *mongo-default-service
+        command: mongos --port 27017 --configdb rs-config-server/mongo-configsvr01:27017 --bind_ip_all
+        healthcheck:
+            test: [ "CMD", "/scripts/wait-for-it.sh", "mongo-router01:27017" ]
+            <<: *common-healthcheck
+        depends_on:
+            mongo-configsvr01:
+                condition: service_healthy
+
+    # ---------------------------------------
+    # Mongo: Config Servers
+    mongo-configsvr01:
+        <<: *mongo-default-service
+        command: mongod --port 27017 --configsvr --replSet rs-config-server
+        healthcheck:
+            test: [ "CMD", "/scripts/wait-for-it.sh", "mongo-configsvr01:27017" ]
+            <<: *common-healthcheck
+        depends_on:
+            mongo-shard01-a:
+                condition: service_healthy
+            mongo-shard02-a:
+                condition: service_healthy
+
+    # ---------------------------------------
+    # Mongo: Shards
+
+    ## --------------------------------------
+    ## Mongo shards: Shard #01
+    mongo-shard01-a:
+        <<: *mongo-default-service
+        command: mongod --port 27017 --shardsvr --replSet rs-shard-01
+        healthcheck:
+            test: [ "CMD", "/scripts/wait-for-it.sh", "mongo-shard01-a:27017" ]
+            <<: *common-healthcheck
+        depends_on:
+            mongo-shard01-b:
+                condition: service_healthy
+            mongo-shard01-c:
+                condition: service_healthy
+    mongo-shard01-b:
+        <<: *mongo-default-service
+        command: mongod --port 27017 --shardsvr --replSet rs-shard-01
+        healthcheck:
+            test: [ "CMD", "/scripts/wait-for-it.sh", "mongo-shard01-b:27017" ]
+            <<: *common-healthcheck
+    mongo-shard01-c:
+        <<: *mongo-default-service
+        command: mongod --port 27017 --shardsvr --replSet rs-shard-01
+        healthcheck:
+            test: [ "CMD", "/scripts/wait-for-it.sh", "mongo-shard01-c:27017" ]
+            <<: *common-healthcheck
+
+    ## --------------------------------------
+    ## Mongo shards: Shard #02
+    mongo-shard02-a:
+        <<: *mongo-default-service
+        command: mongod --port 27017 --shardsvr --replSet rs-shard-02
+        healthcheck:
+            test: [ "CMD", "/scripts/wait-for-it.sh", "mongo-shard02-a:27017" ]
+            <<: *common-healthcheck
+        depends_on:
+            mongo-shard02-b:
+                condition: service_healthy
+            mongo-shard02-c:
+                condition: service_healthy
+    mongo-shard02-b:
+        <<: *mongo-default-service
+        command: mongod --port 27017 --shardsvr --replSet rs-shard-02
+        healthcheck:
+            test: [ "CMD", "/scripts/wait-for-it.sh", "mongo-shard02-b:27017" ]
+            <<: *common-healthcheck
+    mongo-shard02-c:
+        <<: *mongo-default-service
+        command: mongod --port 27017 --shardsvr --replSet rs-shard-02
+        healthcheck:
+            test: [ "CMD", "/scripts/wait-for-it.sh", "mongo-shard02-c:27017" ]
+            <<: *common-healthcheck
+
 
 volumes:
     clickhouse_default_node_data:

@@ -16,7 +16,10 @@ get_color_for_log_level() {
       printf "${color_error}"
       ;;
     white)
-      printf "${color_white}"
+      ${color_white}
+      ;;
+    reset)
+      printf "${color_reset}"
       ;;
     *)
       printf "${color_reset}"
@@ -49,10 +52,11 @@ log() (
   text=$2
 
   text_color=$(get_color_for_log_level "${log_level}")
+  text_color_reset=$(get_color_for_log_level "reset")
   log_level_text=$(get_log_level_text_part "${log_level}")
   current_time=$(date +"%Y-%m-%d %H:%M:%S.%3N")
 
-  echo "${text_color}${current_time} ${log_level_text} ${color_reset}${text}${color_reset}"
+  echo "${text_color}${current_time} ${log_level_text} ${text}${text_color_reset}"
 )
 
 log_debug() (
