@@ -1,9 +1,10 @@
 from dataclasses import dataclass, field
 
-from internal.db import SQLDatabaseClient
-from internal.migrations import Migration, MigrationExecutor
 from loguru import logger
-from utils.text import replace_env_variables
+
+from movies_ugc.internal.db import SQLDatabaseClient
+from movies_ugc.internal.migrations import Migration, MigrationExecutor
+from movies_ugc.utils.text import replace_env_variables
 
 
 @dataclass(slots=True)

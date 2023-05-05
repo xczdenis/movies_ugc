@@ -1,6 +1,7 @@
 import orjson
-from models.utils import orjson_dumps
 from pydantic import BaseModel
+
+from movies_ugc.models.utils import orjson_dumps
 
 
 class UUIDMixin(BaseModel):

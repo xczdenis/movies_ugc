@@ -1,19 +1,18 @@
-from api.dependencies.interactors import get_movie_interactions_service
-from api.utils import make_rout_name
-from api.v1.schemas.movies import FavoriteBaseResponse, FavoriteMarkedResponse
-from config.types import TMovieId, TUserId
 from fastapi import APIRouter, Depends
 from fastapi_pagination.ext.beanie import paginate as paginate
 from fastapi_pagination.links import Page
-from internal.services.movie_interacions import MovieInteractionsService
-from models.data_structures.movies import FavoriteMovie, Movie
-from models.data_structures.users import User
+
+from movies_ugc.api.dependencies.interactors import get_movie_interactions_service
+from movies_ugc.api.utils import make_rout_name
+from movies_ugc.api.v1.schemas.movies import FavoriteBaseResponse, FavoriteMarkedResponse
+from movies_ugc.config.types import TMovieId, TUserId
+from movies_ugc.internal.services.movie_interacions import MovieInteractionsService
+from movies_ugc.models.data_structures.movies import FavoriteMovie, Movie
+from movies_ugc.models.data_structures.users import User
 
 NAMESPACE = "favorites"
 
-router = APIRouter(
-    prefix=f"/{NAMESPACE}",
-)
+router = APIRouter(prefix=f"/{NAMESPACE}")
 
 
 @router.get(

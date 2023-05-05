@@ -1,14 +1,17 @@
 import asyncio
 
-from adapters.db_clients.clickhouse import ClickhouseDBClient
-from adapters.db_clients.kafka.event_consumer import KafkaEventConsumerClient
-from adapters.etl.clickhouse.loaders import ClickhouseLoaderMovieViewing
-from adapters.etl.kafka.extractors import ExtractorKafka
-from adapters.etl.kafka.transformers import TransformerKafkaToClickhouseMovieViewing
-from config.enums import DBTables
-from config.settings import ch_settings, kafka_settings
-from internal.context_managers import AsyncDatabaseClientContextManager, DatabaseClientContextManager
-from internal.etl.pipeline import AsyncETLPipeline
+from movies_ugc.adapters.db_clients.clickhouse import ClickhouseDBClient
+from movies_ugc.adapters.db_clients.kafka.event_consumer import KafkaEventConsumerClient
+from movies_ugc.adapters.etl.clickhouse.loaders import ClickhouseLoaderMovieViewing
+from movies_ugc.adapters.etl.kafka.extractors import ExtractorKafka
+from movies_ugc.adapters.etl.kafka.transformers import TransformerKafkaToClickhouseMovieViewing
+from movies_ugc.config.enums import DBTables
+from movies_ugc.config.settings import ch_settings, kafka_settings
+from movies_ugc.internal.context_managers import (
+    AsyncDatabaseClientContextManager,
+    DatabaseClientContextManager,
+)
+from movies_ugc.internal.etl.pipeline import AsyncETLPipeline
 
 clickhouse_client = ClickhouseDBClient.from_url(
     "clickhouse://{host}:{port}".format(host=ch_settings.CH_NODE_HOST, port=ch_settings.CH_NODE_PORT)

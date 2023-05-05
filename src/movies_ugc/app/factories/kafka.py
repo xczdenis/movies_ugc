@@ -1,9 +1,9 @@
-from adapters.data_gateways.movie_viewing import KafkaMovieViewingGateway
-from adapters.db_clients.kafka.event_producer import KafkaEventProducerClient
-from adapters.db_clients.kafka.schema_registry import KafkaSchemaRegistryClient
-from config.settings import kafka_settings
-from internal.data_gateways.movie_viewing import MovieViewingGateway
-from internal.db import EventProducerClient
+from movies_ugc.adapters.data_gateways.movie_viewing import KafkaMovieViewingGateway
+from movies_ugc.adapters.db_clients.kafka.event_producer import KafkaEventProducerClient
+from movies_ugc.adapters.db_clients.kafka.schema_registry import KafkaSchemaRegistryClient
+from movies_ugc.config.settings import kafka_settings
+from movies_ugc.internal.data_gateways.movie_viewing import MovieViewingGateway
+from movies_ugc.internal.db import EventProducerClient
 
 
 class KafkaEventProducerFactory:

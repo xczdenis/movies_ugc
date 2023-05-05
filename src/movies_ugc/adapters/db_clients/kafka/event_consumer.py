@@ -4,10 +4,11 @@ from typing import AsyncGenerator
 
 import backoff
 from aiokafka import AIOKafkaConsumer, ConsumerRecord
-from config.settings import app_settings
-from internal.db import EventConsumerClient
 from kafka.errors import KafkaConnectionError
 from loguru import logger
+
+from movies_ugc.config.settings import app_settings
+from movies_ugc.internal.db import EventConsumerClient
 
 
 @dataclass(slots=True)

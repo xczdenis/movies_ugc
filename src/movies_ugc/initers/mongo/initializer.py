@@ -1,16 +1,17 @@
 from dataclasses import dataclass
 
-from adapters.db_clients.mongo import MongoDBClient
-from initers.mongo.config_models import (
+from loguru import logger
+
+from movies_ugc.adapters.db_clients.mongo import MongoDBClient
+from movies_ugc.initers.mongo.config_models import (
     MongoBaseNode,
     MongoCluster,
     MongoCollection,
     MongoDatabase,
     MongoShard,
 )
-from initers.mongo.constants import mongo_client_base_connect_config
-from internal.context_managers import DatabaseClientContextManager
-from loguru import logger
+from movies_ugc.initers.mongo.constants import mongo_client_base_connect_config
+from movies_ugc.internal.context_managers import DatabaseClientContextManager
 
 
 @dataclass

@@ -1,11 +1,12 @@
 from typing import Type
 
-from adapters.data_gateways.movie_interactions import MongoMovieInteractionsGateway
-from adapters.db_clients.mongo import AsyncMongoDBClient
 from beanie import Document
-from config.settings import mongo_settings
-from internal.data_gateways.movie_interacions import MovieInteractionsGateway
-from internal.db import SQLDatabaseClient
+
+from movies_ugc.adapters.data_gateways.movie_interactions import MongoMovieInteractionsGateway
+from movies_ugc.adapters.db_clients.mongo import AsyncMongoDBClient
+from movies_ugc.config.settings import mongo_settings
+from movies_ugc.internal.data_gateways.movie_interacions import MovieInteractionsGateway
+from movies_ugc.internal.db import SQLDatabaseClient
 
 
 class MongoMainDBClientFactory:

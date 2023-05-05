@@ -1,6 +1,7 @@
-from config.types import TMovieId, TUserId
-from models.data_structures.movies import MoviePlaybackEventType
 from pydantic import BaseModel
+
+from movies_ugc.config.types import TMovieId, TUserId
+from movies_ugc.models.data_structures.movies import MoviePlaybackEventType
 
 
 class UserMovieMixin(BaseModel):

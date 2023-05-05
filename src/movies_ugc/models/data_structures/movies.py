@@ -1,7 +1,7 @@
 from enum import Enum
 
-from models.data_structures.mixins import OrjsonConfigMixin, UUIDMixin
-from models.data_structures.users import User
+from movies_ugc.models.data_structures.mixins import OrjsonConfigMixin, UUIDMixin
+from movies_ugc.models.data_structures.users import User
 
 
 class MoviePlaybackEventType(str, Enum):

@@ -1,7 +1,7 @@
 from functools import lru_cache
 
-from internal.data_gateways.movie_interacions import MovieInteractionsGateway
-from internal.data_gateways.movie_viewing import MovieViewingGateway
+from movies_ugc.internal.data_gateways.movie_interacions import MovieInteractionsGateway
+from movies_ugc.internal.data_gateways.movie_viewing import MovieViewingGateway
 
 movie_viewing_gateway: MovieViewingGateway | None = None
 movie_interactions_gateway: MovieInteractionsGateway | None = None

@@ -1,12 +1,13 @@
 from typing import Type
 
-from adapters.db_clients.mongo import AsyncMongoDBClient
 from beanie import Document, init_beanie
-from config.types import TUserId
-from internal.data_gateways.movie_interacions import MovieInteractionsGateway
 from loguru import logger
-from models.data_structures.movies import FavoriteMovie
-from models.mongo.movies import Favorite
+
+from movies_ugc.adapters.db_clients.mongo import AsyncMongoDBClient
+from movies_ugc.config.types import TUserId
+from movies_ugc.internal.data_gateways.movie_interacions import MovieInteractionsGateway
+from movies_ugc.models.data_structures.movies import FavoriteMovie
+from movies_ugc.models.mongo.movies import Favorite
 
 
 class MongoMovieInteractionsGateway(MovieInteractionsGateway):

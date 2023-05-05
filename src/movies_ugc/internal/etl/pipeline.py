@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
-from internal.etl.extractor import AsyncExtractor
-from internal.etl.loader import AsyncLoader
-from internal.etl.transformer import AsyncTransformer
+from movies_ugc.internal.etl.extractor import AsyncExtractor
+from movies_ugc.internal.etl.loader import AsyncLoader
+from movies_ugc.internal.etl.transformer import AsyncTransformer
 
 TypeLoaders = tuple[AsyncLoader, ...]
 TypeTransformerLoadersMapping = tuple[AsyncTransformer, TypeLoaders]

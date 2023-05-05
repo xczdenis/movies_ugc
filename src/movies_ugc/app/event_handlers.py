@@ -1,7 +1,8 @@
-from api.dependencies import data_gateaways
-from app import movie_interactions_gateway, movie_viewing_gateway
 from fastapi import FastAPI
-from utils.helpers import get_all_sub_apps
+
+from movies_ugc.api.dependencies import data_gateaways
+from movies_ugc.app import movie_interactions_gateway, movie_viewing_gateway
+from movies_ugc.utils.helpers import get_all_sub_apps
 
 
 def register_handlers(app: FastAPI):

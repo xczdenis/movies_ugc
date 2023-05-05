@@ -1,5 +1,6 @@
-from api.v1.routes import favorites, healthcheck, movie
 from fastapi import APIRouter
+
+from movies_ugc.api.v1.routes import favorites, healthcheck, movie
 
 router_v1 = APIRouter()
 

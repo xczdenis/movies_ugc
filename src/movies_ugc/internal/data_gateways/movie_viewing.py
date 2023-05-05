@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from internal.data_gateways.base import DataGatewayConnector
-from models.data_structures.movies import CurrentPlaybackPosition, MoviePlaybackEvent, MovieViewing
+from movies_ugc.internal.data_gateways.base import DataGatewayConnector
+from movies_ugc.models.data_structures.movies import CurrentPlaybackPosition, MoviePlaybackEvent, MovieViewing
 
 
 class MovieViewingGateway(DataGatewayConnector, ABC):

@@ -2,13 +2,14 @@ import json
 from dataclasses import dataclass, field
 from enum import Enum
 
-from adapters.db_clients.kafka.metadata_client import KafkaMetadataClient
-from adapters.db_clients.kafka.schema_registry import KafkaSchemaRegistryClient
-from internal.migrations import Migration, MigrationExecutor
 from kafka.admin import NewTopic
 from loguru import logger
 from pydantic import BaseModel
-from utils.text import replace_env_variables
+
+from movies_ugc.adapters.db_clients.kafka.metadata_client import KafkaMetadataClient
+from movies_ugc.adapters.db_clients.kafka.schema_registry import KafkaSchemaRegistryClient
+from movies_ugc.internal.migrations import Migration, MigrationExecutor
+from movies_ugc.utils.text import replace_env_variables
 
 
 class CleanupPolicyType(str, Enum):

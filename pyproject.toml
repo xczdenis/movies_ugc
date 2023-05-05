@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Analytics service for movies"
 authors = ["Denis <xczdenis@gmail.com>"]
 readme = "README.md"
+packages = [{include = "movies_ugc", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -35,6 +36,7 @@ black = "^23.3.0"
 isort = "^5.12.0"
 pre-commit = "^3.2.1"
 bandit = "^1.7.5"
+mypy = "^1.2.0"
 
 
 [tool.poetry.group.docs.dependencies]

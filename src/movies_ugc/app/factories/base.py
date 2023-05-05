@@ -1,15 +1,16 @@
 from dataclasses import dataclass
 
-from app.factories.kafka import KafkaEventProducerFactory, KafkaMovieViewingGatewayFactory
-from app.factories.mongo import MongoMainDBClientFactory, MongoMovieInteractionsGatewayFactory
-from config.enums import AdapterName
-from config.settings import app_settings
 from fastapi import APIRouter, FastAPI
 from fastapi.responses import ORJSONResponse
-from internal.data_gateways.movie_interacions import MovieInteractionsGateway
-from internal.data_gateways.movie_viewing import MovieViewingGateway
-from internal.db import EventProducerClient, SQLDatabaseClient
-from utils.helpers import case_free_pop
+
+from movies_ugc.app.factories.kafka import KafkaEventProducerFactory, KafkaMovieViewingGatewayFactory
+from movies_ugc.app.factories.mongo import MongoMainDBClientFactory, MongoMovieInteractionsGatewayFactory
+from movies_ugc.config.enums import AdapterName
+from movies_ugc.config.settings import app_settings
+from movies_ugc.internal.data_gateways.movie_interacions import MovieInteractionsGateway
+from movies_ugc.internal.data_gateways.movie_viewing import MovieViewingGateway
+from movies_ugc.internal.db import EventProducerClient, SQLDatabaseClient
+from movies_ugc.utils.helpers import case_free_pop
 
 
 @dataclass(slots=True)

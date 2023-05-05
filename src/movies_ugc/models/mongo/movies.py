@@ -1,6 +1,7 @@
 from beanie import Document
-from config.types import TMovieId, TUserId
 from pydantic import BaseModel, Field, conint
+
+from movies_ugc.config.types import TMovieId, TUserId
 
 
 class UserMovieMixin(BaseModel):

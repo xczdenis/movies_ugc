@@ -1,10 +1,11 @@
 from dataclasses import dataclass, field
 
-from internal.db import DatabaseClient, SQLDatabaseClient
 from loguru import logger
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
+
+from movies_ugc.internal.db import DatabaseClient, SQLDatabaseClient
 
 
 @dataclass(slots=True)

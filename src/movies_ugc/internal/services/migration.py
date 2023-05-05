@@ -1,8 +1,9 @@
 from collections.abc import Iterator
 from dataclasses import dataclass
 
-from internal.migrations import Migration, MigrationExecutor, MigrationsLoader
 from loguru import logger
+
+from movies_ugc.internal.migrations import Migration, MigrationExecutor, MigrationsLoader
 
 
 @dataclass

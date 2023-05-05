@@ -3,12 +3,13 @@ from typing import Any
 
 import backoff
 from aiokafka import AIOKafkaProducer
-from config.settings import app_settings
-from internal.db import EventProducerClient
 from jsonschema import validate
 from kafka.errors import KafkaConnectionError
 from loguru import logger
 from orjson import orjson
+
+from movies_ugc.config.settings import app_settings
+from movies_ugc.internal.db import EventProducerClient
 
 
 @dataclass(slots=True)

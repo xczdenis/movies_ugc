@@ -1,9 +1,10 @@
 import uvicorn
-from app import create_app
-from app.event_handlers import register_event_handlers
-from app.exception_handler import register_exception_handlers
-from config.logger import setup_logging
-from config.settings import app_settings
+
+from movies_ugc.app import create_app
+from movies_ugc.app.event_handlers import register_event_handlers
+from movies_ugc.app.exception_handler import register_exception_handlers
+from movies_ugc.config.logger import setup_logging
+from movies_ugc.config.settings import app_settings
 
 app = create_app(app_settings.dict())
 

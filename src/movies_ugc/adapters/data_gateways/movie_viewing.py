@@ -1,14 +1,15 @@
 from typing import Any
 
-from adapters.db_clients.kafka.schema_registry import KafkaSchemaRegistryClient
-from adapters.mapings.topic_schemas import topic_schema_mapping
-from internal.data_gateways.movie_viewing import MovieViewingGateway
-from internal.db import EventProducerClient
-from internal.exceptions import ValidationDataError
 from jsonschema import validate
-from models.data_structures.movies import CurrentPlaybackPosition, MoviePlaybackEvent, MovieViewing
 from orjson import orjson
 from schema_registry.client.utils import SchemaVersion
+
+from movies_ugc.adapters.db_clients.kafka.schema_registry import KafkaSchemaRegistryClient
+from movies_ugc.adapters.mapings.topic_schemas import topic_schema_mapping
+from movies_ugc.internal.data_gateways.movie_viewing import MovieViewingGateway
+from movies_ugc.internal.db import EventProducerClient
+from movies_ugc.internal.exceptions import ValidationDataError
+from movies_ugc.models.data_structures.movies import CurrentPlaybackPosition, MoviePlaybackEvent, MovieViewing
 
 
 class KafkaMovieViewingGateway(MovieViewingGateway):

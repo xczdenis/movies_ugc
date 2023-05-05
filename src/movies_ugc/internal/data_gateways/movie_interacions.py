@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 
-from config.types import TUserId
-from internal.data_gateways.base import DataGatewayConnector
-from models.data_structures.movies import FavoriteMovie
+from movies_ugc.config.types import TUserId
+from movies_ugc.internal.data_gateways.base import DataGatewayConnector
+from movies_ugc.models.data_structures.movies import FavoriteMovie
 
 
 class MovieInteractionsGateway(DataGatewayConnector, ABC):

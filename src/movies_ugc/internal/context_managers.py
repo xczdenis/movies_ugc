@@ -1,4 +1,4 @@
-from internal.db import DatabaseClient
+from movies_ugc.internal.db import DatabaseClient
 
 
 class DatabaseClientContextManager:

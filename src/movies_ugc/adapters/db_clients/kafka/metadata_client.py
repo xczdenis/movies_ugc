@@ -2,10 +2,11 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 
 import backoff
-from config.settings import app_settings
-from internal.db import DatabaseClient
 from kafka.admin import KafkaAdminClient
 from loguru import logger
+
+from movies_ugc.config.settings import app_settings
+from movies_ugc.internal.db import DatabaseClient
 
 
 @dataclass(slots=True)

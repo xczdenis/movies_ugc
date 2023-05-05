@@ -1,10 +1,10 @@
-from adapters.db_clients.clickhouse import ClickhouseDBClient
-from adapters.migrations.executors.sql import SQLMigrationExecutor
-from adapters.migrations.file import SemicolonSeparatedLoader
-from config.settings import ch_settings
-from internal.context_managers import DatabaseClientContextManager
-from internal.db import SQLDatabaseClient
-from internal.services.migration import MigrationService
+from movies_ugc.adapters.db_clients.clickhouse import ClickhouseDBClient
+from movies_ugc.adapters.migrations.executors.sql import SQLMigrationExecutor
+from movies_ugc.adapters.migrations.file import SemicolonSeparatedLoader
+from movies_ugc.config.settings import ch_settings
+from movies_ugc.internal.context_managers import DatabaseClientContextManager
+from movies_ugc.internal.db import SQLDatabaseClient
+from movies_ugc.internal.services.migration import MigrationService
 
 clickhouse_client: SQLDatabaseClient = ClickhouseDBClient.from_url(
     "clickhouse://{host}:{port}".format(

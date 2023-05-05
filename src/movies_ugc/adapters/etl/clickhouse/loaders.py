@@ -2,9 +2,9 @@ import time
 from dataclasses import dataclass
 from typing import AsyncGenerator, Callable
 
-from adapters.db_clients.clickhouse import ClickhouseDBClient
-from config.enums import DBTables
-from internal.etl.loader import AsyncLoader
+from movies_ugc.adapters.db_clients.clickhouse import ClickhouseDBClient
+from movies_ugc.config.enums import DBTables
+from movies_ugc.internal.etl.loader import AsyncLoader
 
 
 @dataclass(slots=True)

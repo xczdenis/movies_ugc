@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from typing import AsyncGenerator
 
-from adapters.db_clients.kafka.event_consumer import KafkaEventConsumerClient
 from aiokafka import ConsumerRecord
-from internal.etl.extractor import AsyncExtractor
+
+from movies_ugc.adapters.db_clients.kafka.event_consumer import KafkaEventConsumerClient
+from movies_ugc.internal.etl.extractor import AsyncExtractor
 
 
 @dataclass(slots=True)

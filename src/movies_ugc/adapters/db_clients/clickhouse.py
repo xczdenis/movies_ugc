@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 
 from clickhouse_driver import Client
-from internal.db import SQLDatabaseClient
 from loguru import logger
+
+from movies_ugc.internal.db import SQLDatabaseClient
 
 
 @dataclass(slots=True)

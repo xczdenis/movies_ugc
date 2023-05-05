@@ -1,17 +1,18 @@
-from api.v1 import router_v1
-from app.factories.base import (
+from fastapi import FastAPI
+from fastapi_pagination import add_pagination
+
+from movies_ugc.api.v1 import router_v1
+from movies_ugc.app.factories.base import (
     AppFactory,
     EventProducerFactory,
     MainDBClientFactory,
     MovieInteractionsGatewayFactory,
     MovieViewingGatewayFactory,
 )
-from config.enums import AdapterName
-from config.settings import app_settings, mongo_settings
-from fastapi import FastAPI
-from fastapi_pagination import add_pagination
-from internal.responses import ErrorResponseContent
-from models.mongo.movies import Favorite, Like
+from movies_ugc.config.enums import AdapterName
+from movies_ugc.config.settings import app_settings, mongo_settings
+from movies_ugc.internal.responses import ErrorResponseContent
+from movies_ugc.models.mongo.movies import Favorite, Like
 
 # Database clients factories
 event_producer_factory = EventProducerFactory(AdapterName.kafka)

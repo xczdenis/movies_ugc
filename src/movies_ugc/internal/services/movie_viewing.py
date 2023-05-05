@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
-from config.settings import kafka_settings
-from internal.data_gateways.movie_viewing import MovieViewingGateway
-from internal.exceptions import ValidationDataError
-from models.data_structures.movies import MoviePlaybackEvent, MovieViewing
-from utils.helpers import execute_async_object_function
+from movies_ugc.config.settings import kafka_settings
+from movies_ugc.internal.data_gateways.movie_viewing import MovieViewingGateway
+from movies_ugc.internal.exceptions import ValidationDataError
+from movies_ugc.models.data_structures.movies import MoviePlaybackEvent, MovieViewing
+from movies_ugc.utils.helpers import execute_async_object_function
 
 
 @dataclass

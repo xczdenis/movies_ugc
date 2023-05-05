@@ -1,11 +1,15 @@
 from functools import lru_cache
 
-from api.dependencies.data_gateaways import get_movie_interactions_gateway, get_movie_viewing_gateway
 from fastapi import Depends
-from internal.data_gateways.movie_interacions import MovieInteractionsGateway
-from internal.data_gateways.movie_viewing import MovieViewingGateway
-from internal.services.movie_interacions import MovieInteractionsService
-from internal.services.movie_viewing import MovieViewingService
+
+from movies_ugc.api.dependencies.data_gateaways import (
+    get_movie_interactions_gateway,
+    get_movie_viewing_gateway,
+)
+from movies_ugc.internal.data_gateways.movie_interacions import MovieInteractionsGateway
+from movies_ugc.internal.data_gateways.movie_viewing import MovieViewingGateway
+from movies_ugc.internal.services.movie_interacions import MovieInteractionsService
+from movies_ugc.internal.services.movie_viewing import MovieViewingService
 
 
 @lru_cache()

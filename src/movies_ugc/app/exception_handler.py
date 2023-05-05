@@ -2,9 +2,10 @@ from http import HTTPStatus
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from internal.exceptions import InternalNetworkConnectionError, ValidationDataError
-from internal.responses import ErrorResponseContent
-from utils.helpers import get_all_sub_apps
+
+from movies_ugc.internal.exceptions import InternalNetworkConnectionError, ValidationDataError
+from movies_ugc.internal.responses import ErrorResponseContent
+from movies_ugc.utils.helpers import get_all_sub_apps
 
 
 def register_handlers(app: FastAPI):

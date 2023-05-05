@@ -1,16 +1,15 @@
-from api.dependencies.interactors import get_movie_viewing_service
-from api.utils import make_rout_name
-from api.v1.schemas.movies import MoviePlaybackEventRequest, MovieViewingRequest
 from fastapi import APIRouter, Depends
-from internal.services.movie_viewing import MovieViewingService
-from models.data_structures.movies import Movie, MoviePlaybackEvent, MovieViewing
-from models.data_structures.users import User
+
+from movies_ugc.api.dependencies.interactors import get_movie_viewing_service
+from movies_ugc.api.utils import make_rout_name
+from movies_ugc.api.v1.schemas.movies import MoviePlaybackEventRequest, MovieViewingRequest
+from movies_ugc.internal.services.movie_viewing import MovieViewingService
+from movies_ugc.models.data_structures.movies import Movie, MoviePlaybackEvent, MovieViewing
+from movies_ugc.models.data_structures.users import User
 
 NAMESPACE = "movie"
 
-router = APIRouter(
-    prefix=f"/{NAMESPACE}",
-)
+router = APIRouter(prefix=f"/{NAMESPACE}")
 
 
 @router.post(

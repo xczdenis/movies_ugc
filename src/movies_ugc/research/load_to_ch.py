@@ -6,11 +6,12 @@ from collections.abc import Iterable
 from functools import lru_cache, wraps
 from multiprocessing import Pool, cpu_count
 
-from adapters.db_clients.clickhouse import ClickhouseDBClient
-from config.settings import ROOT_DIR, ch_settings
-from internal.context_managers import DatabaseClientContextManager
-from internal.db import SQLDatabaseClient
 from loguru import logger
+
+from movies_ugc.adapters.db_clients.clickhouse import ClickhouseDBClient
+from movies_ugc.config.settings import ROOT_DIR, ch_settings
+from movies_ugc.internal.context_managers import DatabaseClientContextManager
+from movies_ugc.internal.db import SQLDatabaseClient
 
 clickhouse_client: SQLDatabaseClient = ClickhouseDBClient.from_url(
     "clickhouse://{host}:{port}".format(

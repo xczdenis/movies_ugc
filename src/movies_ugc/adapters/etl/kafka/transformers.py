@@ -1,7 +1,8 @@
 from typing import AsyncGenerator
 
 import orjson
-from internal.etl.transformer import AsyncTransformer
+
+from movies_ugc.internal.etl.transformer import AsyncTransformer
 
 
 class TransformerKafkaToClickhouseMovieViewing(AsyncTransformer):
