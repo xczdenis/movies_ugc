@@ -3,14 +3,13 @@ from dataclasses import dataclass
 from config.types import TUserId
 from internal.data_gateways.movie_interacions import MovieInteractionsGateway
 from models.data_structures.movies import FavoriteMovie
-from pydantic import BaseModel
 
 
 @dataclass
 class MovieInteractionsService:
     movie_interactions_gateway: MovieInteractionsGateway
 
-    async def get_user_favorite_movies(self, user_id: TUserId) -> list[BaseModel]:
+    async def get_user_favorite_movies(self, user_id: TUserId):
         return await self.movie_interactions_gateway.get_user_favorite_movies(user_id)
 
     async def add_movie_to_favorites(self, favorite_movie: FavoriteMovie):

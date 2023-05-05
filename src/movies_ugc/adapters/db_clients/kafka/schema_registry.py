@@ -19,14 +19,15 @@ class KafkaSchemaRegistryClient(DatabaseClient):
     native_client: SchemaRegistryClient | None = None
 
     async def connect(self, **kwargs):
+        logger.info("Create db client: %s" % self.get_db_name())
         await self.define_native_client()
+        logger.success("Database client for db '%s' successfully created" % self.get_db_name())
 
     async def define_native_client(self, **kwargs):
         self.native_client = await self.create_native_client(**kwargs)
 
     @backoff.on_exception(backoff.expo, Exception, max_tries=8)
     async def create_native_client(self, **kwargs) -> SchemaRegistryClient:
-        logger.info("Create db client: %s" % self.get_db_name())
         return SchemaRegistryClient({"url": "http://{host}:{port}".format(host=self.host, port=self.port)})
 
     async def close(self, **kwargs):

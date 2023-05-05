@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from internal.db import DatabaseClient
+from internal.db import DatabaseClient, SQLDatabaseClient
 from loguru import logger
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import MongoClient
@@ -46,20 +46,21 @@ class MongoDBClient(DatabaseClient):
 
 
 @dataclass(slots=True)
-class AsyncMongoDBClient(DatabaseClient):
+class AsyncMongoDBClient(SQLDatabaseClient):
     host: str = "localhost"
     port: int = 27017
     native_client: AsyncIOMotorClient | None = None
     config: dict = field(default_factory=lambda: {})
 
     async def connect(self, **kwargs):
+        logger.info("Create db client: %s" % self.get_db_name())
         self.define_native_client()
+        logger.success("Database client for db '%s' successfully created" % self.get_db_name())
 
     def define_native_client(self, **kwargs):
         self.native_client = self.create_native_client(**kwargs)
 
     def create_native_client(self, **kwargs) -> AsyncIOMotorClient:
-        logger.info("Create db client: %s" % self.get_db_name())
         return AsyncIOMotorClient(
             "mongodb://{host}:{port}/".format(host=self.host, port=self.port), **self.config
         )
@@ -86,3 +87,6 @@ class AsyncMongoDBClient(DatabaseClient):
 
     def get_db(self, db_name: str):
         return self.native_client[db_name]
+
+    async def execute(self, query: str, *args, **kwargs):
+        ...

@@ -3,12 +3,11 @@ from abc import ABC, abstractmethod
 from config.types import TUserId
 from internal.data_gateways.base import DataGatewayConnector
 from models.data_structures.movies import FavoriteMovie
-from pydantic import BaseModel
 
 
 class MovieInteractionsGateway(DataGatewayConnector, ABC):
     @abstractmethod
-    async def get_user_favorite_movies(self, user_id: TUserId) -> list[BaseModel]:
+    async def get_user_favorite_movies(self, user_id: TUserId):
         ...
 
     @abstractmethod

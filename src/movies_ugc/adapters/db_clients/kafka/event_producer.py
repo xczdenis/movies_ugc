@@ -18,8 +18,10 @@ class KafkaEventProducerClient(EventProducerClient):
     native_client: AIOKafkaProducer | None = None
 
     async def connect(self, **kwargs):
+        logger.info("Connect to db: %s" % self.get_db_name())
         await self.define_native_client(**kwargs)
         await self.start_native_client(**kwargs)
+        logger.success("The connection to db: '%s' successfully established" % self.get_db_name())
 
     async def define_native_client(self, **kwargs):
         self.native_client = await self.create_native_client(**kwargs)
@@ -33,7 +35,6 @@ class KafkaEventProducerClient(EventProducerClient):
     @backoff.on_exception(backoff.expo, KafkaConnectionError, max_tries=8)
     async def start_native_client(self, **kwargs):
         if self.native_client is not None:
-            logger.info("Connect to db: %s" % self.get_db_name())
             await self.native_client.start()
 
     async def close(self, **kwargs):
