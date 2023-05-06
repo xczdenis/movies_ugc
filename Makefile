@@ -9,7 +9,7 @@ CURRENT_ENVIRONMENT_PREFIX=PREFIX_DEV
 DOCKER_COMPOSE_MAIN_FILE=docker-compose.yml
 DOCKER_COMPOSE_DEV_FILE=docker-compose.dev.yml
 DOCKER_COMPOSE_PROD_FILE=docker-compose.prod.yml
-DOCKER_COMPOSE_TEST_FILE=docker-compose.test.yml
+DOCKER_COMPOSE_TEST_FILE_NAME=docker-compose.test.yml
 DOCKER_COMPOSE_TEST_DEV_FILE=docker-compose.test.dev.yml
 
 COMPOSE_OPTION_START_AS_DEMON=up -d --build
@@ -53,8 +53,10 @@ endif
 ifeq (,$(wildcard ./${DOCKER_COMPOSE_DEV_FILE}))
 	DOCKER_COMPOSE_DEV_FILE=_
 endif
-ifeq (,$(wildcard ./${DOCKER_COMPOSE_TEST_FILE}))
+ifeq (,$(wildcard ./${DOCKER_COMPOSE_TEST_FILE_NAME}))
 	DOCKER_COMPOSE_TEST_FILE=_
+else
+	DOCKER_COMPOSE_TEST_FILE=${DOCKER_COMPOSE_TEST_FILE_NAME}
 endif
 ifeq (,$(wildcard ./${DOCKER_COMPOSE_TEST_DEV_FILE}))
 	DOCKER_COMPOSE_TEST_DEV_FILE=_
@@ -101,7 +103,6 @@ run_docker_compose_for_env:
 	@if [ $(strip ${env}) != "_" ]; then \
 		DOCKER_BUILDKIT=${DOCKER_BUILDKIT} \
 		COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}_$(strip ${env}) \
-		INSTALL_DEV=true \
 		docker-compose \
 			-f ${DOCKER_COMPOSE_MAIN_FILE} \
 			$(strip ${override_file}) \
@@ -109,7 +110,6 @@ run_docker_compose_for_env:
     else \
 		DOCKER_BUILDKIT=${DOCKER_BUILDKIT} \
 		COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME} \
-		INSTALL_DEV=true \
 		docker-compose \
 			-f ${DOCKER_COMPOSE_MAIN_FILE} \
 			$(strip ${override_file}) \
@@ -173,8 +173,9 @@ down-test:
 	$(call run_docker_compose_for_env, "${PREFIX_TEST}", "${DOCKER_COMPOSE_TEST_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
 	$(call run_docker_compose_for_env, "_", "${DOCKER_COMPOSE_TEST_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
 
+
 # build only required images
-.PHONEY: build-required
+.PHONEY: prebuild
 prebuild:
 	$(call log, Build essential images)
 	$(call run_docker_compose_for_current_env, build ${ESSENTIAL_SERVICES})
@@ -182,38 +183,60 @@ prebuild:
 
 # build and run docker containers in demon mode
 .PHONEY: run
-run: down
+run: down prebuild
 	$(call log, Run containers (${CURRENT_ENVIRONMENT_PREFIX}))
 	$(call run_docker_compose_for_current_env, --profile default ${COMPOSE_OPTION_START_AS_DEMON} ${s})
 
 
 # build and run docker containers in demon mode for oltp profile
 .PHONEY: run-oltp
-run-oltp: down
+run-oltp: down prebuild
 	$(call log, Run containers for oltp profile (${CURRENT_ENVIRONMENT_PREFIX}))
 	$(call run_docker_compose_for_current_env, --profile oltp ${COMPOSE_OPTION_START_AS_DEMON} ${s})
 
 
 # build and run docker containers in demon mode for olap profile
 .PHONEY: run-olap
-run-olap: down
+run-olap: down prebuild
 	$(call log, Run containers for olap profile (${CURRENT_ENVIRONMENT_PREFIX}))
 	$(call run_docker_compose_for_current_env, --profile olap ${COMPOSE_OPTION_START_AS_DEMON} ${s})
 
 
 # build and run docker containers in demon mode for olap profile
 .PHONEY: run-nosql
-run-nosql: down
+run-nosql: down prebuild
 	$(call log, Run containers for nosql profile (${CURRENT_ENVIRONMENT_PREFIX}))
 	$(call run_docker_compose_for_current_env, --profile nosql ${COMPOSE_OPTION_START_AS_DEMON} ${s})
 
 
 # build and run docker containers in demon mode for api profile
 .PHONEY: run-api
-run-api: down
+run-api: down prebuild
 	$(call log, Run containers for api profile (${CURRENT_ENVIRONMENT_PREFIX}))
 	$(call run_docker_compose_for_current_env, --profile api ${COMPOSE_OPTION_START_AS_DEMON} ${s})
 
+
+# build and run tests in docker for api profile
+.PHONEY: test
+test: down prebuild
+	$(call log, Run tests in docker for api profile)
+	@if [ "${DOCKER_COMPOSE_TEST_FILE}" != "_" ]; then \
+		make run_docker_compose_for_env \
+			env=${PREFIX_TEST} \
+			override_file="-f ${DOCKER_COMPOSE_TEST_FILE}" \
+			cmd="build ${ESSENTIAL_SERVICES}"; \
+		make run_docker_compose_for_env \
+			env=${PREFIX_TEST} \
+			override_file="-f ${DOCKER_COMPOSE_TEST_FILE}" \
+			cmd="--profile api ${COMPOSE_OPTION_START_AS_DEMON}"; \
+	else \
+		echo "${RED}ERROR:${RESET} No such file '${DOCKER_COMPOSE_TEST_FILE_NAME}'. Tests cannot be run."; \
+	fi \
+
+
+.PHONEY: test-local
+test-local:
+	@cd $(CURDIR) && python -m pytest
 
 # show container's logs
 .PHONEY: logs _logs
@@ -261,19 +284,3 @@ config:
 	$(call log, Docker-compose configuration (${CURRENT_ENVIRONMENT_PREFIX}))
 	$(call run_docker_compose_for_current_env, ${COMPOSE_PROFILE_DEFAULT} config)
 
-
-fake:
-	@clear
-	@echo "${RED}----------------!!! DANGER !!!----------------"
-	@echo "${PURPLE}Будет выполнено копирование файла ${WHITE}.env.template${PURPLE} в ${WHITE}.env.${PURPLE}"
-	@echo "Если файл ${WHITE}.env${PURPLE} уже существует, то он будет перезеписан."
-	@echo "А потом сразу запустится разворачивание кластера и замеры производительности."
-	@read -p "${BLUE}Вы точно уверены, что хотите продолжить? [yes/n]: ${RESET}" TAG \
-	&& if [ "_$${TAG}" != "_yes" ]; then echo aborting; exit 1 ; fi
-	@cp .env.template .env
-	@make dev
-	@chmod -R 777 ./scripts
-	$(call log,"Запускаю инициализацию базы данных")
-	@CH_LOCAL_MODE=true python src/db_upgrade.py
-	$(call log,"Запускаю загрузку данных")
-	python src/load_data.py

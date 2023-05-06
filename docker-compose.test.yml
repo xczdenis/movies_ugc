@@ -1,0 +1,23 @@
+services:
+    python-src:
+        build:
+            args:
+                env: production
+
+    app:
+        entrypoint: "bash -c"
+        command: "exit 0"
+
+    tests:
+        platform: ${DOCKER_IMG_PLATFORM:-linux/amd64}
+        build:
+            context: .
+            dockerfile: ./docker/tests/Dockerfile
+        env_file: .env
+        depends_on:
+            kafka-broker:
+                condition: service_healthy
+            kafka-schema-registry:
+                condition: service_healthy
+            mongo-initer:
+                condition: service_completed_successfully

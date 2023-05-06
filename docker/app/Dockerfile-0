@@ -1,11 +1,9 @@
 ARG env=production
-ARG img=python:3.11-slim
 
-FROM ${img} as base
+FROM python:3.11-slim as base
 
 ENV CONTAINER_HOME_DIR=app \
     HOST_SRC_DIR=src \
-    PROJECT_PACKAGE_NAME=movies_ugc \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     POETRY_VERSION=1.4.0
@@ -18,6 +16,7 @@ ARG env
 FROM base as builder
 
 COPY ./docker/scripts /scripts
+COPY ./docker/app/scripts /scripts
 RUN chmod -R 777 /scripts
 
 RUN apt-get update \
@@ -28,10 +27,8 @@ RUN apt-get update \
 
 COPY pyproject.toml poetry.lock README.md ./
 
-RUN mkdir -p /$CONTAINER_HOME_DIR/$HOST_SRC_DIR/$PROJECT_PACKAGE_NAME && touch /$CONTAINER_HOME_DIR/$HOST_SRC_DIR/$PROJECT_PACKAGE_NAME/__init__.py
-
 RUN poetry config virtualenvs.in-project true \
-    && poetry install
+    && poetry install --only main
 
 
 FROM base as final
@@ -45,7 +42,8 @@ FROM final as development
 FROM final as production
 
 COPY ./$HOST_SRC_DIR ./$HOST_SRC_DIR
-COPY ./init_db ./init_db
 
 
 FROM ${env}
+
+ENTRYPOINT ["/scripts/entrypoint.sh"]

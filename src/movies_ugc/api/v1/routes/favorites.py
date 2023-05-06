@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from fastapi import APIRouter, Depends
 from fastapi_pagination.ext.beanie import paginate as paginate
 from fastapi_pagination.links import Page
@@ -35,6 +37,7 @@ async def get_user_favorite_movies(
     "/users/{user_id}/movies/{movie_id}",
     name=make_rout_name(NAMESPACE, "add_movie_to_favorites"),
     response_description="The movie added to favorites successfully",
+    status_code=HTTPStatus.CREATED,
 )
 async def add_movie_to_favorites(
     user_id: TUserId,

@@ -57,11 +57,11 @@ services:
 
     kafka-schema-registry:
         ports:
-            - "${KAFKA_SCHEMA_REGISTRY_EXPOSE_PORT}:${KAFKA_SCHEMA_REGISTRY_PORT}"
+            - "${KAFKA_SCHEMA_REGISTRY_PORT}:8081"
 
     kafka-ui:
         ports:
-            - "${KAFKA_UI_EXPOSE_PORT}:8080"
+            - "${KAFKA_UI_PORT}:8080"
 
     kafka-initer:
         volumes:

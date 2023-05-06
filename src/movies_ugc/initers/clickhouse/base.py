@@ -14,7 +14,7 @@ clickhouse_client: SQLDatabaseClient = ClickhouseDBClient.from_url(
 )
 
 
-def db_upgrade():
+def init():
     with DatabaseClientContextManager(db_client=clickhouse_client):
         migrations_loader = SemicolonSeparatedLoader(
             repository_path=ch_settings.CH_MIGRATIONS_REPOSITORY_PATH
@@ -24,7 +24,3 @@ def db_upgrade():
             migrations_loader=migrations_loader, migration_executor=migration_executor
         )
         migrations_service.execute_migrations()
-
-
-if __name__ == "__main__":
-    db_upgrade()

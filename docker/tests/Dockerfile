@@ -1,6 +1,8 @@
 FROM python-src
 
-COPY ./docker/app/scripts /scripts
+COPY ./docker/tests/scripts /scripts
 RUN chmod -R 777 /scripts
+
+COPY ./tests /app/tests
 
 ENTRYPOINT ["/scripts/entrypoint.sh"]

@@ -6,18 +6,18 @@ x-profiles-olap: &profiles-olap
 x-profiles-oltp: &profiles-oltp
     profiles:
         - default
+        - api
         - oltp
 
 x-profiles-nosql: &profiles-nosql
     profiles:
         - default
+        - api
         - nosql
 
 x-profiles-api: &profiles-api
     profiles:
         - default
-        - oltp
-        - nosql
         - api
 
 x-base-service: &base-service
@@ -46,8 +46,7 @@ x-clickhouse-default-node-with-keeper: &clickhouse-default-node-with-keeper
     image: clickhouse-default-node-with-keeper
 
 x-kafka-default-broker: &kafka-default-broker
-    <<: *base-service
-    <<: *profiles-api
+    <<: [*profiles-oltp, *base-service]
     build:
         context: .
         dockerfile: ./docker/kafka/broker/Dockerfile
@@ -65,8 +64,7 @@ x-kafka-default-broker: &kafka-default-broker
         ALLOW_PLAINTEXT_LISTENER: yes
 
 x-mongo-default-service: &mongo-default-service
-    <<: *base-service
-    <<: *profiles-api
+    <<: [*profiles-nosql, *base-service]
     env_file: .env
     build:
         context: .
@@ -94,32 +92,26 @@ services:
     # app
     # =======================================
     app:
-        <<: *base-service
+        <<: [*profiles-api, *base-service]
         env_file: .env
         build:
             context: .
             dockerfile: ./docker/app/Dockerfile
             args:
                 env: ${ENVIRONMENT}
-        environment:
-            APP_HOST: 0.0.0.0
-            APP_PORT: 8000
-            KAFKA_CONNECTION_HOST: kafka-broker
-            KAFKA_CONNECTION_PORT: ${KAFKA_BROKER_CLIENT_PORT}
-            KAFKA_SCHEMA_REGISTRY_CONNECTION_HOST: kafka-schema-registry
-            KAFKA_SCHEMA_REGISTRY_CONNECTION_PORT: ${KAFKA_SCHEMA_REGISTRY_PORT}
         depends_on:
             kafka-broker:
                 condition: service_healthy
             kafka-schema-registry:
                 condition: service_healthy
+            mongo-initer:
+                condition: service_completed_successfully
 
     # =======================================
     # ClickHouse
     # =======================================
     clickhouse-default-node:
-        <<: *default-service
-        <<: *profiles-olap
+        <<: [*profiles-olap, *default-service]
         build:
             context: .
             dockerfile: ./docker/clickhouse/node.Dockerfile
@@ -130,8 +122,7 @@ services:
             - clickhouse_default_node_data:/var/lib/clickhouse
 
     clickhouse-default-node-with-keeper:
-        <<: *default-service
-        <<: *profiles-olap
+        <<: [*profiles-olap, *default-service]
         build:
             context: .
             dockerfile: ./docker/clickhouse/node-keeper.Dockerfile
@@ -142,8 +133,7 @@ services:
             - clickhouse_default_node_with_keeper_data:/var/lib/clickhouse
 
     clickhouse-shard1:
-        <<: *clickhouse-default-node-with-keeper
-        <<: *profiles-olap
+        <<: [*profiles-olap, *clickhouse-default-node-with-keeper]
         environment:
             CH_NODE_HOST_NAME: clickhouse-shard1
             CH_NODE_SHARD_ID: 1
@@ -154,8 +144,7 @@ services:
             <<: *common-healthcheck
 
     clickhouse-shard1-replica1:
-        <<: *clickhouse-default-node
-        <<: *profiles-olap
+        <<: [*profiles-olap, *clickhouse-default-node]
         environment:
             CH_NODE_HOST_NAME: clickhouse-shard1-replica1
             CH_NODE_SHARD_ID: 1
@@ -170,8 +159,7 @@ services:
                 condition: service_healthy
 
     clickhouse-shard2:
-        <<: *clickhouse-default-node-with-keeper
-        <<: *profiles-olap
+        <<: [*profiles-olap, *clickhouse-default-node-with-keeper]
         environment:
             CH_NODE_HOST_NAME: clickhouse-shard2
             CH_NODE_SHARD_ID: 2
@@ -182,8 +170,7 @@ services:
             <<: *common-healthcheck
 
     clickhouse-shard2-replica1:
-        <<: *clickhouse-default-node
-        <<: *profiles-olap
+        <<: [*profiles-olap, *clickhouse-default-node]
         environment:
             CH_NODE_HOST_NAME: clickhouse-shard2-replica1
             CH_NODE_SHARD_ID: 2
@@ -198,8 +185,7 @@ services:
                 condition: service_healthy
 
     clickhouse-keeper-quorum:
-        <<: *clickhouse-default-node-with-keeper
-        <<: *profiles-olap
+        <<: [*profiles-olap, *clickhouse-default-node-with-keeper]
         environment:
             CH_NODE_HOST_NAME: clickhouse-keeper-quorum
             CH_NODE_SHARD_ID: 0
@@ -215,8 +201,7 @@ services:
             - clickhouse-shard2
 
     clickhouse-initer:
-        <<: *base-service
-        <<: *profiles-olap
+        <<: [*profiles-olap, *base-service]
         env_file: .env
         build:
             context: .
@@ -255,8 +240,7 @@ services:
             <<: *common-healthcheck
 
     kafka-schema-registry:
-        <<: *base-service
-        <<: *profiles-api
+        <<: [*profiles-oltp, *base-service]
         build:
             context: .
             dockerfile: ./docker/kafka/schema_registry/Dockerfile
@@ -273,8 +257,7 @@ services:
             <<: *common-healthcheck
 
     kafka-ui:
-        <<: *base-service
-        <<: *profiles-api
+        <<: [*profiles-oltp, *base-service]
         image: ${KAFKA_UI_IMG}
         environment:
             KAFKA_CLUSTERS_0_NAME: kraft
@@ -285,19 +268,13 @@ services:
                 condition: service_healthy
 
     kafka-initer:
-        <<: *base-service
-        <<: *profiles-api
+        <<: [*profiles-oltp, *base-service]
         env_file: .env
         build:
             context: .
             dockerfile: ./docker/kafka/initer/Dockerfile
             args:
                 env: ${ENVIRONMENT}
-        environment:
-            KAFKA_CONNECTION_HOST: kafka-broker
-            KAFKA_CONNECTION_PORT: ${KAFKA_BROKER_CLIENT_PORT}
-            KAFKA_SCHEMA_REGISTRY_CONNECTION_HOST: kafka-schema-registry
-            KAFKA_SCHEMA_REGISTRY_CONNECTION_PORT: ${KAFKA_SCHEMA_REGISTRY_PORT}
         depends_on:
             kafka-broker:
                 condition: service_healthy
@@ -312,8 +289,7 @@ services:
     # ---------------------------------------
     # Mongo: Initer
     mongo-initer:
-        <<: *base-service
-        <<: *profiles-api
+        <<: [*profiles-nosql, *base-service]
         env_file: .env
         build:
             context: .
