@@ -1,16 +1,20 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
 from pydantic import BaseSettings, validator
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SRC_DIR = BASE_DIR.parent
 ROOT_DIR = SRC_DIR.parent
 
+ENV_FILE_PATH = os.path.join(ROOT_DIR, ".env")
+ENV_LOCAL_FILE_PATH = os.path.join(ROOT_DIR, ".env.local")
+
 
 class BaseSettingsConfigMixin(BaseSettings):
     class Config:
-        env_file = os.path.join(ROOT_DIR, ".env"), os.path.join(ROOT_DIR, ".env.local")
+        env_file = ENV_FILE_PATH, ENV_LOCAL_FILE_PATH
         env_file_encoding = "utf-8"
 
 
@@ -51,8 +55,8 @@ class MongoSettings(BaseSettingsConfigMixin):
 class KafkaSettings(BaseSettingsConfigMixin):
     KAFKA_CONNECTION_HOST: str
     KAFKA_CONNECTION_PORT: int
-    KAFKA_SCHEMA_REGISTRY_CONNECTION_HOST: str
-    KAFKA_SCHEMA_REGISTRY_CONNECTION_PORT: int
+    KAFKA_SCHEMA_REGISTRY_HOST: str
+    KAFKA_SCHEMA_REGISTRY_PORT: int
     KAFKA_TOPIC_MOVIE_PLAYBACK_EVENT: str
     KAFKA_TOPIC_CURRENT_PLAYBACK_POSITION: str
     KAFKA_TOPIC_MOVIE_VIEWING: str
@@ -61,6 +65,10 @@ class KafkaSettings(BaseSettingsConfigMixin):
     KAFKA_SCHEMA_MOVIE_VIEWING: str
     KAFKA_MIGRATIONS_REPOSITORY_PATH: str = str(ROOT_DIR / "init_db" / "kafka")
 
+
+# Load the .env.local file after the .env file, and overwrite the variables
+if os.path.exists(ENV_LOCAL_FILE_PATH):
+    load_dotenv(dotenv_path=ENV_LOCAL_FILE_PATH, override=True)
 
 app_settings: AppSettings = AppSettings()
 ch_settings: CHSettings = CHSettings()

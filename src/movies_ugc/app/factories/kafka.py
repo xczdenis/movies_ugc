@@ -29,7 +29,7 @@ class KafkaMovieViewingGatewayFactory:
     def make_schema_registry_client(cls) -> KafkaSchemaRegistryClient:
         return KafkaSchemaRegistryClient.from_url(
             "kafka://{host}:{port}".format(
-                host=kafka_settings.KAFKA_SCHEMA_REGISTRY_CONNECTION_HOST,
-                port=kafka_settings.KAFKA_SCHEMA_REGISTRY_CONNECTION_PORT,
+                host=kafka_settings.KAFKA_SCHEMA_REGISTRY_HOST,
+                port=kafka_settings.KAFKA_SCHEMA_REGISTRY_PORT,
             )
         )
