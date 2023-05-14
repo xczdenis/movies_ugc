@@ -3,8 +3,10 @@ from dataclasses import dataclass
 from fastapi import APIRouter, FastAPI
 from fastapi.responses import ORJSONResponse
 
-from movies_ugc.app.factories.kafka import KafkaEventProducerFactory, KafkaMovieViewingGatewayFactory
-from movies_ugc.app.factories.mongo import MongoMainDBClientFactory, MongoMovieInteractionsGatewayFactory
+from movies_ugc.app.factories.event_producer import EventProducerFactory
+from movies_ugc.app.factories.main_db import MainDBClientFactory
+from movies_ugc.app.factories.movie_interactions_gateway import MovieInteractionsGatewayFactory
+from movies_ugc.app.factories.movie_viewing_gateway import MovieViewingGatewayFactory
 from movies_ugc.config.enums import AdapterName
 from movies_ugc.config.settings import app_settings
 from movies_ugc.internal.data_gateways.movie_interacions import MovieInteractionsGateway
@@ -33,32 +35,33 @@ class AppFactory:
 
 
 @dataclass(slots=True)
-class BaseFactoryMixin:
+class BaseStrategyMixin:
     adapter_name: str = ""
 
 
 @dataclass(slots=True)
-class EventProducerFactory(BaseFactoryMixin):
+class EventProducerStrategy(BaseStrategyMixin):
     def make_event_producer(self) -> EventProducerClient:
         if self.adapter_name == AdapterName.kafka:
-            return KafkaEventProducerFactory.make_event_producer()
+            return EventProducerFactory.make_kafka_event_producer()
 
 
-class MainDBClientFactory(BaseFactoryMixin):
+@dataclass(slots=True)
+class MainDBClientStrategy(BaseStrategyMixin):
     def make_main_db_client(self) -> SQLDatabaseClient:
         if self.adapter_name == AdapterName.mongo:
-            return MongoMainDBClientFactory.make_main_db_client()
+            return MainDBClientFactory.make_mongo_main_db_client()
 
 
 @dataclass(slots=True)
-class MovieViewingGatewayFactory(BaseFactoryMixin):
+class MovieViewingGatewayStrategy(BaseStrategyMixin):
     def make_movie_viewing_gateway(self, event_producer: EventProducerClient) -> MovieViewingGateway:
         if self.adapter_name == AdapterName.kafka:
-            return KafkaMovieViewingGatewayFactory.make_movie_viewing_gateway(event_producer)
+            return MovieViewingGatewayFactory.make_kafka_movie_viewing_gateway(event_producer)
 
 
 @dataclass(slots=True)
-class MovieInteractionsGatewayFactory(BaseFactoryMixin):
+class MovieInteractionsGatewayStrategy(BaseStrategyMixin):
     def make_movie_interactions_gateway(self, **kwargs) -> MovieInteractionsGateway:
         if self.adapter_name == AdapterName.mongo:
-            return MongoMovieInteractionsGatewayFactory.make_movie_interactions_gateway(**kwargs)
+            return MovieInteractionsGatewayFactory.make_mongo_movie_interactions_gateway(**kwargs)

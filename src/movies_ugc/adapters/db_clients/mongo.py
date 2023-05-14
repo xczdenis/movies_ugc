@@ -45,6 +45,9 @@ class MongoDBClient(DatabaseClient):
     def get_host_name(self) -> str:
         return "{host}:{port}".format(host=self.host, port=self.port)
 
+    def get_db(self, db_name: str):
+        return self.native_client[db_name]
+
 
 @dataclass(slots=True)
 class AsyncMongoDBClient(SQLDatabaseClient):

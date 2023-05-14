@@ -100,16 +100,35 @@ services:
             args:
                 env: ${ENVIRONMENT}
         depends_on:
-            kafka-broker:
-                condition: service_healthy
-            kafka-schema-registry:
-                condition: service_healthy
+            kafka-initer:
+                condition: service_completed_successfully
             mongo-initer:
                 condition: service_completed_successfully
 
     # =======================================
     # ClickHouse
     # =======================================
+    clickhouse-initer:
+        <<: [ *profiles-olap, *base-service ]
+        env_file: .env
+        build:
+            context: .
+            dockerfile: ./docker/clickhouse/initer/Dockerfile
+        environment:
+            CH_NODE_HOST: clickhouse-shard1
+            CH_NODE_PORT: ${CH_NODE_PORT}
+        depends_on:
+            clickhouse-shard1:
+                condition: service_healthy
+            clickhouse-shard1-replica1:
+                condition: service_healthy
+            clickhouse-shard2:
+                condition: service_healthy
+            clickhouse-shard2-replica1:
+                condition: service_healthy
+            clickhouse-keeper-quorum:
+                condition: service_healthy
+
     clickhouse-default-node:
         <<: [*profiles-olap, *default-service]
         build:
@@ -200,32 +219,22 @@ services:
             - clickhouse-shard1
             - clickhouse-shard2
 
-    clickhouse-initer:
-        <<: [*profiles-olap, *base-service]
-        env_file: .env
-        build:
-            context: .
-            dockerfile: ./docker/clickhouse/initer/Dockerfile
-            args:
-                env: ${ENVIRONMENT}
-        environment:
-            CH_NODE_HOST: clickhouse-shard1
-            CH_NODE_PORT: ${CH_NODE_PORT}
-        depends_on:
-            clickhouse-shard1:
-                condition: service_healthy
-            clickhouse-shard1-replica1:
-                condition: service_healthy
-            clickhouse-shard2:
-                condition: service_healthy
-            clickhouse-shard2-replica1:
-                condition: service_healthy
-            clickhouse-keeper-quorum:
-                condition: service_healthy
 
     # =======================================
     # Kafka
     # =======================================
+    kafka-initer:
+        <<: [*profiles-oltp, *base-service]
+        env_file: .env
+        build:
+            context: .
+            dockerfile: ./docker/kafka/initer/Dockerfile
+        depends_on:
+            kafka-broker:
+                condition: service_healthy
+            kafka-schema-registry:
+                condition: service_healthy
+
     kafka-broker:
         <<: *kafka-default-broker
         environment:
@@ -265,20 +274,6 @@ services:
             KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://kafka-schema-registry:${KAFKA_SCHEMA_REGISTRY_PORT}
         depends_on:
             kafka-broker:
-                condition: service_healthy
-
-    kafka-initer:
-        <<: [*profiles-oltp, *base-service]
-        env_file: .env
-        build:
-            context: .
-            dockerfile: ./docker/kafka/initer/Dockerfile
-            args:
-                env: ${ENVIRONMENT}
-        depends_on:
-            kafka-broker:
-                condition: service_healthy
-            kafka-schema-registry:
                 condition: service_healthy
 
 

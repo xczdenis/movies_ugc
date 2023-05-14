@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from movies_ugc.config.types import TMovieId, TUserId
 from movies_ugc.models.data_structures.movies import MoviePlaybackEventType
@@ -24,6 +24,14 @@ class MovieViewingRequest(UserMovieMixin):
 
 class FavoriteBaseResponse(UserMovieMixin):
     pass
+
+
+class SetScoreRequest(BaseModel):
+    score: int = Field(..., ge=0, le=10, title="Score", description="Score for movie")
+
+
+class LikedMovieResponse(UserMovieMixin):
+    score: int
 
 
 class FavoriteMarkedResponse(UserMovieMixin):

@@ -1,0 +1,48 @@
+@startuml
+participant Client
+participant Controller as C
+participant MovieViewingService as MS
+participant MovieViewingGateway as KG
+queue Kafka as Kafka
+database ClickHouse as CH #FFD600
+
+
+Client -> C: POST /movie-viewing
+activate C
+
+C -> C: Преобразование \nво внутренний \nформат
+note left
+данные о просмотре фильма:
+{
+    user_id: str,
+    movie_id: str,
+    viewed_seconds: int
+}
+end note
+
+C -> MS: Добавить данные \nо просмотре фильма
+activate MS
+
+MS -> KG: Сохранить данные \nв Kafka
+activate KG
+
+KG -> Kafka: Отправить данные \nв топик
+activate Kafka
+
+Kafka --> KG: Подтверждение
+deactivate Kafka
+
+KG --> MS: Подтверждение
+deactivate KG
+
+MS --> C: Подтверждение
+deactivate MS
+
+C --> Client: Response
+deactivate C
+
+loop#Gold #LightBlue ETL
+    Kafka -> CH: загрузка \nв OLAP \nхранилище
+end
+
+@enduml
