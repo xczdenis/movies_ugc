@@ -2,38 +2,32 @@ from fastapi import FastAPI
 from fastapi_pagination import add_pagination
 
 from movies_ugc.api.v1 import router_v1
-from movies_ugc.app.factories.base import (
-    AppFactory,
-    EventProducerFactory,
-    MainDBClientFactory,
-    MovieInteractionsGatewayFactory,
-    MovieViewingGatewayFactory,
-)
+from movies_ugc.app import factories
 from movies_ugc.config.enums import AdapterName
 from movies_ugc.config.settings import app_settings, mongo_settings
 from movies_ugc.internal.responses import ErrorResponseContent
-from movies_ugc.models.mongo.movies import Favorite, Like
+from movies_ugc.models.mongo.movies import Favorite, Like, LikedMovieMongo
 
-# Database clients factories
-event_producer_factory = EventProducerFactory(AdapterName.kafka)
-main_db_client_factory = MainDBClientFactory(AdapterName.mongo)
+# Database clients strategies
+event_producer_strategy = factories.EventProducerStrategy(AdapterName.kafka)
+main_db_client_strategy = factories.MainDBClientStrategy(AdapterName.mongo)
 
-# Data gateways factories
-movie_viewing_gateway_factory = MovieViewingGatewayFactory(AdapterName.kafka)
-movie_interactions_gateway_factory = MovieInteractionsGatewayFactory(AdapterName.mongo)
+# Data gateways strategies
+movie_viewing_gateway_strategy = factories.MovieViewingGatewayStrategy(AdapterName.kafka)
+movie_interactions_gateway_factory = factories.MovieInteractionsGatewayStrategy(AdapterName.mongo)
 
 # Database clients
-event_producer = event_producer_factory.make_event_producer()
-main_db_client = main_db_client_factory.make_main_db_client()
+event_producer = event_producer_strategy.make_event_producer()
+main_db_client = main_db_client_strategy.make_main_db_client()
 
 # Data gateways
-movie_viewing_gateway = movie_viewing_gateway_factory.make_movie_viewing_gateway(
+movie_viewing_gateway = movie_viewing_gateway_strategy.make_movie_viewing_gateway(
     event_producer=event_producer
 )
 movie_interactions_gateway = movie_interactions_gateway_factory.make_movie_interactions_gateway(
     db_client=main_db_client,
     database=mongo_settings.MONGO_DB_MOVIES,
-    models=[Like, Favorite],
+    models=[Like, Favorite, LikedMovieMongo],
 )
 
 global_responses = {
@@ -47,7 +41,7 @@ def mount_sub_app(main_app: FastAPI, api_version_prefix: str, sub_app: FastAPI):
 
 
 def create_app(config: dict) -> FastAPI:
-    app_factory = AppFactory()
+    app_factory = factories.AppFactory()
 
     global_app_attributes = {"responses": {**global_responses}}
 

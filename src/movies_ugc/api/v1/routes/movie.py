@@ -7,13 +7,13 @@ from movies_ugc.internal.services.movie_viewing import MovieViewingService
 from movies_ugc.models.data_structures.movies import Movie, MoviePlaybackEvent, MovieViewing
 from movies_ugc.models.data_structures.users import User
 
-NAMESPACE = "movie"
+NAMESPACE = "movies"
 
-router = APIRouter(prefix=f"/{NAMESPACE}")
+router = APIRouter(prefix=f"/{NAMESPACE}", tags=["Movies"])
 
 
 @router.post(
-    "/add-playback-event",
+    "/playback-event",
     name=make_rout_name(NAMESPACE, "add_playback_event"),
     response_description="The event added successfully",
 )
@@ -37,7 +37,7 @@ async def add_playback_event(
 
 
 @router.post(
-    "/add-movie-viewing",
+    "/movie-viewing",
     name=make_rout_name(NAMESPACE, "add_movie_viewing"),
     response_description="The movie viewing time added successfully",
 )
@@ -46,7 +46,7 @@ async def add_movie_viewing(
     service: MovieViewingService = Depends(get_movie_viewing_service),
 ) -> MovieViewing:
     """
-    Add data about the time of viewing the movie.
+    Add time spent watching a movie.
     """
     movie_viewing = MovieViewing(
         user=User(id=request_movie_viewing.user_id),

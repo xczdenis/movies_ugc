@@ -14,13 +14,13 @@ from movies_ugc.models.data_structures.users import User
 
 NAMESPACE = "favorites"
 
-router = APIRouter(prefix=f"/{NAMESPACE}")
+router = APIRouter(prefix=f"/{NAMESPACE}", tags=["Favorites"])
 
 
 @router.get(
     "/users/{user_id}",
     name=make_rout_name(NAMESPACE, "get_user_favorite_movies"),
-    response_description="The list of favorite user movies",
+    response_description="A list of favorite user movies",
 )
 async def get_user_favorite_movies(
     user_id: TUserId,

@@ -4,7 +4,7 @@
 запустить тесты, изменить код теста и перезапустить контейнер с тестами с помощью PyCharm
 (кнопка Start справа вверху) - это не затронет твой терминал и не нужно будет
 выполнять лишние команды:
-![test-container-in-pycharm](../img/PyCharm/test-container-in-pycharm.png)
+![test-container-in-pycharm](../assets/img/PyCharm/test-container-in-pycharm.png)
 
 ## Запустить тесты в режиме демона
 === "Make"

@@ -1,13 +1,14 @@
 from typing import Type
 
 from beanie import Document, init_beanie
+from beanie.odm.operators.update.general import Set
 from loguru import logger
 
 from movies_ugc.adapters.db_clients.mongo import AsyncMongoDBClient
-from movies_ugc.config.types import TUserId
+from movies_ugc.config.types import TMovieId, TUserId
 from movies_ugc.internal.data_gateways.movie_interacions import MovieInteractionsGateway
 from movies_ugc.models.data_structures.movies import FavoriteMovie
-from movies_ugc.models.mongo.movies import Favorite
+from movies_ugc.models.mongo.movies import Favorite, Like
 
 
 class MongoMovieInteractionsGateway(MovieInteractionsGateway):
@@ -42,3 +43,11 @@ class MongoMovieInteractionsGateway(MovieInteractionsGateway):
         await Favorite.find(
             Favorite.user_id == favorite_movie.user.id, Favorite.movie_id == favorite_movie.movie.id
         ).delete()
+
+    async def set_score_for_movie(self, user_id: TUserId, movie_id: TMovieId, score: int):
+        await Like.find_one(Like.user_id == user_id, Like.movie_id == movie_id).upsert(
+            Set({Like.score: score}), on_insert=Like(user_id=user_id, movie_id=movie_id, score=score)
+        )
+
+    async def get_liked_movies(self, user_id: TUserId):
+        return Like.find(Like.user_id == user_id)

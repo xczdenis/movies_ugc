@@ -38,3 +38,9 @@ class MovieViewing(OrjsonConfigMixin):
 class FavoriteMovie(OrjsonConfigMixin):
     user: User
     movie: Movie
+
+
+class LikedMovie(OrjsonConfigMixin):
+    user: User
+    movie: Movie
+    score: int

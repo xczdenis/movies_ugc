@@ -102,7 +102,7 @@ endef
 run_docker_compose_for_env:
 	@if [ $(strip ${env}) != "_" ]; then \
 		DOCKER_BUILDKIT=${DOCKER_BUILDKIT} \
-		COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}_$(strip ${env}) \
+		COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME} \
 		docker-compose \
 			-f ${DOCKER_COMPOSE_MAIN_FILE} \
 			$(strip ${override_file}) \
@@ -152,8 +152,33 @@ remove:
 	@echo "Вы собираетесь удалить все неиспользуемые образы, контейнеры и тома."
 	@echo "Будут удалены все незапущенные контейнеры, все образы для незапущенных контейнеров и все тома для незапущенных контейнеров"
 	@read -p "${ORANGE}Вы точно уверены, что хотите продолжить? [yes/n]: ${RESET}" TAG \
-	&& if [ "_$${TAG}" != "_yes" ]; then echo aborting; exit 1 ; fi
+	&& if [ "_$${TAG}" != "_yes" ]; then echo "Nothing happened"; exit 1 ; fi
 	docker-compose down --rmi all --volumes --remove-orphans && docker system prune -a --volumes --force
+
+
+# create .env and .env.local files if they are not exist
+.PHONY: env
+env:
+	@if [ -f .env ]; then \
+		read -p "File ${GREEN}.env${RESET} already exists. Overwrite it [y/n]:${RESET} " yn; \
+        case $$yn in \
+            [Yy]* ) cp .env.template .env; echo "File ${GREEN}.env${RESET} has been overwritten!";; \
+            * ) echo "Nothing happened";; \
+        esac \
+    else \
+        cp .env.template .env; \
+        echo "File ${GREEN}.env${RESET} created from ${GREEN}.env.template${RESET}!"; \
+    fi
+	@if [ -f .env.local ]; then \
+        read -p "File ${GREEN}.env.local${RESET} already exists. Overwrite it [y/n]: " yn; \
+        case $$yn in \
+            [Yy]* ) cp .env.local.template .env.local; echo "File ${GREEN}.env.local${RESET} has been overwritten!";; \
+            * ) echo "Nothing happened";; \
+        esac \
+    else \
+        cp .env.local.template .env.local; \
+        echo "File ${GREEN}.env.local${RESET} created from ${GREEN}.env.local.template${RESET}!"; \
+    fi
 
 
 # stop and remove all running containers

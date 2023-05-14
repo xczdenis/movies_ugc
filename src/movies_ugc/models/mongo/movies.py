@@ -9,9 +9,7 @@ class UserMovieMixin(BaseModel):
     movie_id: TMovieId
 
 
-class Like(Document):
-    user_id: str
-    movie_id: str
+class Like(Document, UserMovieMixin):
     score: conint(ge=0, le=10) = Field(..., description="Score between 0 and 10")
 
     class Settings:
