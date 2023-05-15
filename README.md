@@ -238,6 +238,7 @@ DOCKER_IMG_PLATFORM=linux/arm64
 make run
 ```
 Приложение будет доступно по адресу [http://localhost:8000](http://localhost:8000/api/v1/openapi).
+
 Документация: [http://localhost:8000/api/v1/openapi](http://localhost:8000/api/v1/openapi).
 
 Запустить проект локально (должны быть запущены все докер-контейнеры кроме `app`):
