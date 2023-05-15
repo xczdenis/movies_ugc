@@ -6,7 +6,7 @@ from movies_ugc.app import factories
 from movies_ugc.config.enums import AdapterName
 from movies_ugc.config.settings import app_settings, mongo_settings
 from movies_ugc.internal.responses import ErrorResponseContent
-from movies_ugc.models.mongo.movies import Favorite, Like, LikedMovieMongo
+from movies_ugc.models.mongo.movies import Favorite, Like
 
 # Database clients strategies
 event_producer_strategy = factories.EventProducerStrategy(AdapterName.kafka)
@@ -27,7 +27,7 @@ movie_viewing_gateway = movie_viewing_gateway_strategy.make_movie_viewing_gatewa
 movie_interactions_gateway = movie_interactions_gateway_factory.make_movie_interactions_gateway(
     db_client=main_db_client,
     database=mongo_settings.MONGO_DB_MOVIES,
-    models=[Like, Favorite, LikedMovieMongo],
+    models=[Like, Favorite],
 )
 
 global_responses = {

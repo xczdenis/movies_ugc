@@ -37,7 +37,7 @@ RUN poetry config virtualenvs.in-project true \
 FROM base as final
 
 COPY --from=builder /scripts /scripts
-COPY --from=builder /app/.venv ./.venv
+COPY --from=builder /$CONTAINER_HOME_DIR/.venv ./.venv
 
 
 FROM final as development
@@ -45,7 +45,7 @@ FROM final as development
 
 FROM final as production
 
-COPY ./src ./$HOST_SRC_DIR
+COPY ./$HOST_SRC_DIR ./$HOST_SRC_DIR
 COPY ./init_db ./init_db
 
 

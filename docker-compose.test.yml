@@ -15,9 +15,7 @@ services:
             dockerfile: ./docker/tests/Dockerfile
         env_file: .env
         depends_on:
-            kafka-broker:
-                condition: service_healthy
-            kafka-schema-registry:
-                condition: service_healthy
+            kafka-initer:
+                condition: service_completed_successfully
             mongo-initer:
                 condition: service_completed_successfully
