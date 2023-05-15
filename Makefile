@@ -144,6 +144,31 @@ define run_docker_compose_for_current_env
 endef
 
 
+.PHONY: init
+init:
+	$(call log, Init project)
+	@if [ -z "$$VIRTUAL_ENV" ]; then \
+		echo "${RED}Virtual environment is NOT ACTIVE!${RESET}"; \
+		echo "Please make sure that virtual environment is activated and then run '${PURPLE}make init${RESET}' again."; \
+	else \
+		echo "${BLUE}Virtual environment is active: ${ORANGE}${VIRTUAL_ENV}${RESET}"; \
+		echo ""; \
+		echo "---------------------------------"; \
+		echo "${BLUE}Installing requirements${RESET}"; \
+		echo "command: ${PURPLE}poetry install${RESET}"; \
+		poetry install; \
+		echo ""; \
+		echo "---------------------------------"; \
+		echo "${BLUE}Installing pre-commit hooks${RESET}"; \
+		echo "command: ${PURPLE}pre-commit install${RESET}"; \
+		pre-commit install; \
+		echo ""; \
+		echo "---------------------------------"; \
+		echo "${BLUE}Installing pre-commit msg check${RESET}"; \
+		echo "command: ${PURPLE}pre-commit install --hook-type commit-msg${RESET}"; \
+		pre-commit install --hook-type commit-msg; \
+	fi
+
 # remove all existing containers, volumes, images
 .PHONEY: remove
 remove:
@@ -182,19 +207,19 @@ env:
 
 
 # stop and remove all running containers
-.PHONEY: down down-prod down-dev down-test
+.PHONEY: down _down-prod _down-dev _down-test
 down:
 	$(call log, Down containers)
-	@make down-prod
-	@make down-dev
-	@make down-test
-down-prod:
+	@make _down-prod
+	@make _down-dev
+	@make _down-test
+_down-prod:
 	$(call run_docker_compose_for_env, "${PREFIX_PROD}", "${DOCKER_COMPOSE_PROD_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
 	$(call run_docker_compose_for_env, "_", "${DOCKER_COMPOSE_PROD_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
-down-dev:
+_down-dev:
 	$(call run_docker_compose_for_env, "${PREFIX_DEV}", "${DOCKER_COMPOSE_DEV_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
 	$(call run_docker_compose_for_env, "_", "${DOCKER_COMPOSE_DEV_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
-down-test:
+_down-test:
 	$(call run_docker_compose_for_env, "${PREFIX_TEST}", "${DOCKER_COMPOSE_TEST_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
 	$(call run_docker_compose_for_env, "_", "${DOCKER_COMPOSE_TEST_FILE}", "${COMPOSE_PROFILE_DEFAULT} down")
 
