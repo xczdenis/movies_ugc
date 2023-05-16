@@ -1,3 +1,21 @@
+<a href="https://www.mongodb.com/docs/" target="_blank">
+    <img src="https://img.shields.io/static/v1?label=MongoDB&message=6.0&color=green&style=flat&logo=mongodb" alt="MongoDB">
+</a>
+<a href="https://www.mongodb.com/docs/" target="_blank">
+    <img src="https://img.shields.io/static/v1?label=ClickHouse&message=^23&color=yellow&style=flat&logo=clickhouse" alt="ClickHouse">
+</a>
+<a href="https://hub.docker.com/r/bitnami/kafka" target="_blank">
+    <img src="https://img.shields.io/static/v1?label=bitnami%2Fkafka&message=3&color=blue&style=flat&logo=apachekafka" alt="bitnami/kafka">
+</a>
+<a href="#">
+    <img src="https://img.shields.io/static/v1?label=python&message=^3.11&color=green&style=flat&logo=python" alt="Supported Python versions">
+</a>
+<a href="https://black.readthedocs.io/en/stable/">
+    <img src="https://img.shields.io/static/v1?label=style&message=black&color=black&style=flat&logo=python" alt="Supported Python versions">
+</a>
+
+
+
 # UGC-movies
 
 UGC-movies - сервис генерации контента для [Онлайн кинотеатра "Movies"](https://github.com/xczdenis/movies).
