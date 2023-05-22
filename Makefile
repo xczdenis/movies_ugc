@@ -170,7 +170,7 @@ init:
 	fi
 
 # remove all existing containers, volumes, images
-.PHONEY: remove
+.PHONY: remove
 remove:
 	@clear
 	@echo "${RED}----------------!!! DANGER !!!----------------"
@@ -207,7 +207,7 @@ env:
 
 
 # stop and remove all running containers
-.PHONEY: down _down-prod _down-dev _down-test
+.PHONY: down _down-prod _down-dev _down-test
 down:
 	$(call log, Down containers)
 	@make _down-prod
@@ -225,49 +225,49 @@ _down-test:
 
 
 # build only required images
-.PHONEY: prebuild
+.PHONY: prebuild
 prebuild:
 	$(call log, Build essential images)
 	$(call run_docker_compose_for_current_env, build ${ESSENTIAL_SERVICES})
 
 
 # build and run docker containers in demon mode
-.PHONEY: run
+.PHONY: run
 run: down prebuild
 	$(call log, Run containers (${CURRENT_ENVIRONMENT_PREFIX}))
 	$(call run_docker_compose_for_current_env, --profile default ${COMPOSE_OPTION_START_AS_DEMON} ${s})
 
 
 # build and run docker containers in demon mode for oltp profile
-.PHONEY: run-oltp
+.PHONY: run-oltp
 run-oltp: down prebuild
 	$(call log, Run containers for oltp profile (${CURRENT_ENVIRONMENT_PREFIX}))
 	$(call run_docker_compose_for_current_env, --profile oltp ${COMPOSE_OPTION_START_AS_DEMON} ${s})
 
 
 # build and run docker containers in demon mode for olap profile
-.PHONEY: run-olap
+.PHONY: run-olap
 run-olap: down prebuild
 	$(call log, Run containers for olap profile (${CURRENT_ENVIRONMENT_PREFIX}))
 	$(call run_docker_compose_for_current_env, --profile olap ${COMPOSE_OPTION_START_AS_DEMON} ${s})
 
 
 # build and run docker containers in demon mode for olap profile
-.PHONEY: run-nosql
+.PHONY: run-nosql
 run-nosql: down prebuild
 	$(call log, Run containers for nosql profile (${CURRENT_ENVIRONMENT_PREFIX}))
 	$(call run_docker_compose_for_current_env, --profile nosql ${COMPOSE_OPTION_START_AS_DEMON} ${s})
 
 
 # build and run docker containers in demon mode for api profile
-.PHONEY: run-api
+.PHONY: run-api
 run-api: down prebuild
 	$(call log, Run containers for api profile (${CURRENT_ENVIRONMENT_PREFIX}))
 	$(call run_docker_compose_for_current_env, --profile api ${COMPOSE_OPTION_START_AS_DEMON} ${s})
 
 
 # build and run tests in docker for api profile
-.PHONEY: test
+.PHONY: test
 test: down prebuild
 	$(call log, Run tests in docker for api profile)
 	@if [ "${DOCKER_COMPOSE_TEST_FILE}" != "_" ]; then \
@@ -284,12 +284,12 @@ test: down prebuild
 	fi \
 
 
-.PHONEY: test-local
+.PHONY: test-local
 test-local:
 	@cd $(CURDIR) && python -m pytest
 
 # show container's logs
-.PHONEY: logs _logs
+.PHONY: logs _logs
 logs:
 	@read -p "${ORANGE}Container name: ${RESET}" _TAG && \
 	if [ "_$${_TAG}" != "_" ]; then \
@@ -302,7 +302,7 @@ _logs:
 
 
 # run bash into container
-.PHONEY: bash _bash
+.PHONY: bash _bash
 bash:
 	@read -p "${ORANGE}Container name: ${RESET}" _TAG && \
 	if [ "_$${_TAG}" != "_" ]; then \
@@ -315,7 +315,7 @@ _bash:
 
 
 # stop containers
-.PHONEY: stop _stop
+.PHONY: stop _stop
 stop:
 	@read -p "${ORANGE}Containers name (press Enter to stop all containers): ${RESET}" _TAG && \
 	if [ "_$${_TAG}" != "_" ]; then \
@@ -329,7 +329,7 @@ _stop:
 
 
 # show docker-compose configuration
-.PHONEY: config
+.PHONY: config
 config:
 	$(call log, Docker-compose configuration (${CURRENT_ENVIRONMENT_PREFIX}))
 	$(call run_docker_compose_for_current_env, ${COMPOSE_PROFILE_DEFAULT} config)
