@@ -39,17 +39,17 @@ bandit = "^1.7.5"
 mypy = "^1.2.0"
 
 
-[tool.poetry.group.docs.dependencies]
-mkdocs = "^1.4.2"
-mkdocs-material = "^9.1.8"
-pymdown-extensions = "^9.11"
-mkdocs-glightbox = "^0.3.4"
-
-
 [tool.poetry.group.tests.dependencies]
 pytest = "^7.3.1"
 pytest-asyncio = "^0.21.0"
 
+
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.4.3"
+mkdocs-material = "^9.1.15"
+pymdown-extensions = "^10.0.1"
+mkdocs-glightbox = "^0.3.4"
 
 [tool.pytest.ini_options]
 addopts = ["-v", "-p", "no:warnings", "--import-mode=importlib",]
