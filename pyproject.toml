@@ -9,11 +9,9 @@ packages = [{include = "movies_ugc", from = "src"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 pydantic = "^1.10.2"
-python-dotenv = "^0.21.0"
 loguru = "^0.6.0"
 backoff = "^2.2.1"
 clickhouse-driver = "^0.2.5"
-fastapi = "^0.92.0"
 uvicorn = "^0.20.0"
 orjson = "^3.8.6"
 aiokafka = "^0.8.0"
@@ -24,6 +22,8 @@ pymongo = "^4.3.3"
 beanie = "^1.18.0"
 motor = "^3.1.2"
 fastapi-pagination = "^0.12.2"
+fastapi = "^0.96.0"
+python-dotenv = "^1.0.0"
 
 [tool.poetry.group.lint.dependencies]
 flake8 = "^6.0.0"
